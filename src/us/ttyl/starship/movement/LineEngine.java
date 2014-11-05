@@ -57,8 +57,8 @@ public class LineEngine extends MovementEngine
 	@Override
 	public void updateDisplacement() 
 	{	
-		_currentX = _currentX + (Math.cos(Math.toRadians(_currentDirection)) * _currentSpeed);
-	    _currentY = _currentY + (Math.sin(Math.toRadians(_currentDirection)) * _currentSpeed);
+		_currentX = _currentX + (GameState._density * (Math.cos(Math.toRadians(_currentDirection)) * _currentSpeed));
+	    _currentY = _currentY + (GameState._density * (Math.sin(Math.toRadians(_currentDirection)) * _currentSpeed));
 	}
 	
 	@Override

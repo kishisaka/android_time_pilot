@@ -24,4 +24,7 @@ public class GameState
 	
 	// player life counter
 	public static int _lives = 2;
+	
+	//screen density
+	public static int _density = 1;
 }

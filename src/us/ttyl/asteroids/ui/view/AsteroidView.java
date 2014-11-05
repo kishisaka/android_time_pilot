@@ -25,7 +25,6 @@ import android.view.SurfaceView;
 
 public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback 
 {
-	private static String TAG = "AsteroidView";
 	AsteroidViewThread mAsteroidViewThread = null;
 	Bitmap mBackground = null;
 	int mControllerCircleX = 0;
@@ -49,16 +48,16 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		return Math.sqrt((x * x) + (y * y));
 	}
 	 
-	public AsteroidView(Context context, AttributeSet attrs)
+	public AsteroidView(Context context, AttributeSet attr)
 	{
 		super(context);
 		SurfaceHolder holder = getHolder();
         holder.addCallback(this);
+        mBackground = BitmapFactory.decodeResource(getResources(), R.drawable.helicopter);
         
         //load up our sprites, 
         init(context);
         
-        mBackground =  BitmapFactory.decodeResource(context.getResources(), R.drawable.helicopter);
 		// create thread only; it's started in surfaceCreated()
 		mAsteroidViewThread = new AsteroidViewThread(context, holder);
         setFocusable(true); // make sure we get key events 
@@ -86,7 +85,8 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 				for(int i =0 ; i < GameState._weapons.size(); i ++)
 				{
 					MovementEngine enemyWeapon = GameState._weapons.get(i);
-					if (enemyWeapon.getWeaponName().equals("enenmy_gun") || enemyWeapon.getWeaponName().equals("enenmy_missile") )
+					if (enemyWeapon.getWeaponName().equals("enenmy_gun") || enemyWeapon.getWeaponName().equals("enenmy_missile")
+							|| enemyWeapon.getWeaponName().equals("enemy"))
 					{
 						GameState._weapons.remove(i);
 					}
@@ -100,8 +100,9 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, "player", -1); 
 		GameState._weapons.add(player);			
 		
-		// start the game engine! 		
-		new MainLoop(gsl);
+		// start the game engine! 
+		int density = (int)getContext().getResources().getDisplayMetrics().density;
+		new MainLoop(gsl, density);
 		
 		//initialize deg map (reversed)
 		_degrev = new int[360];
@@ -156,7 +157,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			
 			//draw the player window to the screen	
 			Canvas canvas = null;
-			while (mIsRunning == true)
+			while (GameState.mIsRunning == true)
 			{
 				//draw to the onscreen buffer using onDraw(), lock the canvas first
 				try
@@ -209,6 +210,8 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		    	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "player"), 232, 232, null);
 		    }
 		
+		    int density = (int)getContext().getResources().getDisplayMetrics().density;
+		    int pixelSize = 3 * density;
 		    //draw all other targets relative to center target, don't draw center target
 		    for (int i = 0; i < GameState._weapons.size(); i ++)
 		    {
@@ -226,12 +229,12 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "enemy"),(int)(232 + x), (int)(232 - y), null);
 			        }
 			        else if(me.getWeaponName().equals("gun_enemy"))
-			        {
-			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(253 + x), (int)(253 - y), mGunEnemy);
+			        {			        	
+			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(250 + pixelSize - y), mGunEnemy);
 			        }
 			        else if(me.getWeaponName().equals("gun_player"))
 			        {
-			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(253 + x), (int)(253 - y), mGunPlayer);
+			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(253 + pixelSize - y), mGunPlayer);
 			        }
 			        else if(me.getWeaponName().equals("missile_player") || me.getWeaponName().equals("missile_enemy"))
 			        {
@@ -247,7 +250,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        {		        
 			        	//g.setColor(new Color(115,134,230));
 			            //g.fillRect((int)(_screenSize/2 + x), (int)(_screenSize/2 - y), 3, 3);
-			            canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(253 + x), (int)(253 - y), mParticleExplosion);
+			            canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(253 + pixelSize - y), mParticleExplosion);
 			        }
 			        else if(me.getWeaponName().equals("missile_smoke"))
 			        {	
@@ -268,7 +271,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        		//g.setColor(new Color(0,125,255));
 			        	}
 			            // g.fillRect((int)(_screenSize/2 + x), (int)(_screenSize/2 - y), 3, 3);
-			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(253 + x), (int)(253 - y), smokeColor);
+			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(250 + pixelSize - y), smokeColor);
 			        }
 		    	}	
 		    }
@@ -348,7 +351,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			if ((GameState._weapons.get(0).getWeaponName().equals("player") == false))
 			{
 				//restart game
-				GameState._lives = 0;
+				GameState._lives = 2;
 				GameState._playerBulletsShot = 0;
 				GameState._playerEnemyShot = 0;
 				GameState._playerScore = 0;
@@ -370,7 +373,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 				//launch missiles
 				long currentTime = System.currentTimeMillis();
 				long timeDiff = currentTime - mMissileLastLaunch;
-				if (timeDiff > 30)
+				if (timeDiff > 100)
 				{
 					mMissileLastLaunch = currentTime;
 					// find closest target			

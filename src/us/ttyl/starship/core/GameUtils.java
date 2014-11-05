@@ -34,6 +34,37 @@ public class GameUtils
 	{
 	    return (centerY * -1) + targetY;
 	}
+	
+	/**
+	 * get an x,y coord given a track (in deg) and a distance vector
+	 * @param track
+	 * @param distance
+	 * @return x/y coord (double[2])
+	 */
+	public static double[] getCoordsGivenTrackAndDistance(int track, int distance)
+	{
+		if (track == 90)
+		{
+			return new double[]{0,300};
+		}
+		if (track == 180)
+		{
+			return new double[]{-300,0};
+		}
+		if (track == 270)
+		{
+			return new double[]{0,-300};
+		}
+		if (track == 360)
+		{
+			return new double[]{300,0};
+		}
+		
+		double[] coord = new double[2];
+		coord[0] = Math.cos(Math.toRadians(track)) * distance;
+		coord[1] = Math.sin(Math.toRadians(track)) * distance;
+		return coord;
+	}
 	 
 	/**
 	 * returns deg given a x and y 
@@ -133,7 +164,8 @@ public class GameUtils
 			{
 				for(int x = 0; x < 12; x ++)
 				{
-					tileList.add(Bitmap.createBitmap(tileMap, x * 36, y * 36, 36, 36));								
+					int density = (int)context.getResources().getDisplayMetrics().density;
+					tileList.add(Bitmap.createBitmap(tileMap, x * density * 36, y * density * 36, density * 36, density * 36));								
 				}
 			}			
 		}

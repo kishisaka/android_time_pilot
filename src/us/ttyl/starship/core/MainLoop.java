@@ -1,6 +1,5 @@
 package us.ttyl.starship.core;
 
-import android.util.Log;
 import us.ttyl.starship.env.EnvBuilder;
 import us.ttyl.starship.listener.GameStateListener;
 import us.ttyl.starship.movement.FollowEngine;
@@ -12,13 +11,16 @@ public class MainLoop extends Thread
 	private int _gunModifier = 0;
 	private int _gunModifierSwivel = 3;
 	private GameStateListener _gameStatelistener;
+	private int _density;
 	
-	public MainLoop(GameStateListener gameStateListener)
+	public MainLoop(GameStateListener gameStateListener, int density)
 	{
-		initGame();
+		
+		_density = density;
 		_gameStatelistener = gameStateListener;
 		// SpeedController controller = new SpeedController();
 		// controller.start();
+		initGame();
 		start();
 	}
 	
@@ -38,7 +40,7 @@ public class MainLoop extends Thread
 		    	//generate a new ship. 	
 		    	int enemyCount = GameUtils.getTypeCount("enemy"); 
 		    	// System.out.println("enemyCount: " + enemyCount);
-				if (currentTime - startTime > 300 && enemyCount < 10)
+				if (currentTime - startTime > 300 && enemyCount < 4)
 				{
 					startTime = currentTime;
 			    	EnvBuilder.generateEnemy(GameState._weapons.get(0).getX()
@@ -52,7 +54,7 @@ public class MainLoop extends Thread
 					for(int i = 0; i < GameState._weapons.size(); i ++)
 					{
 						// guns fire guns until player reaches 500
-						if ((int)(Math.random() * 100) > 95)
+						if ((int)(Math.random() * 100) > getEnemyGunFireRate())
 						{
 							if (GameState._weapons.get(i).getWeaponName().equals("enemy"))
 							{
@@ -72,7 +74,7 @@ public class MainLoop extends Thread
 							}
 						}
 						// enemey fires guns and homing missiles if player has more than 500 points
-						if ((int)(Math.random() * 100) > 95 && GameState._playerScore > 500)
+						if ((int)(Math.random() * 100) > getEnemyGunFireRate())
 						{
 							if (GameState._weapons.get(i).getWeaponName().equals("enemy"))
 							{
@@ -111,12 +113,13 @@ public class MainLoop extends Thread
 				}
 				
 				//create clouds 
-//				long currentTimeClouds = currentTime;
-//				if (currentTimeClouds - startTimeClouds > 1000)
-//				{
-//					startTimeClouds = currentTimeClouds;
-//					EnvBuilder.generateCloud(GameState._weapons.get(0).getX(), GameState._weapons.get(0).getY(), GameState._weapons.get(0).getCurrentDirection());
-//				}
+				int cloundCount = GameUtils.getTypeCount("cloud"); 
+				long currentTimeClouds = currentTime;
+				if (currentTimeClouds - startTimeClouds > 1000 && cloundCount < 6)
+				{
+					startTimeClouds = currentTimeClouds;
+					EnvBuilder.generateCloud(GameState._weapons.get(0).getX(), GameState._weapons.get(0).getY(), GameState._weapons.get(0).getCurrentDirection());
+				}
 				
 				// move the ships around, check for collisions.
 				for(int i = 0; i < GameState._weapons.size(); i ++)
@@ -134,7 +137,7 @@ public class MainLoop extends Thread
 		    		checkCollisions(ship);
 		    	}
 				
-				//check destroyed and remove from list if so, remove all objects that are over 450 units away from the player)
+				//check destroyed and remove from list if so, remove all objects that are over 450 units away from the player
 				for(int i = 1; i < GameState._weapons.size(); i ++)
 		    	{
 					if ((i > 0 && GameUtils.getRange(GameState._weapons.get(0), GameState._weapons.get(i)) > 450) 
@@ -144,7 +147,6 @@ public class MainLoop extends Thread
 					}		    		
 		    	}
 				
-				Log.i("kurt_test", "ship count: " + GameState._weapons.size());
 		    	sleep(15);
 			}
 			catch(InterruptedException e)
@@ -163,17 +165,17 @@ public class MainLoop extends Thread
 		
 		if (_gunModifier == 0)
 		{
-			_gunModifier = _gunModifierSwivel;
+			_gunModifier = (_gunModifierSwivel * GameState._density);
 		}
 		else
 		{
-			if (_gunModifier == _gunModifierSwivel)
+			if (_gunModifier == _gunModifierSwivel * GameState._density)
 			{
-				_gunModifier = -1 * _gunModifierSwivel;
+				_gunModifier = -1 * (_gunModifierSwivel* GameState._density);
 			}
 			else
 			{
-				if (_gunModifier == -1 * _gunModifierSwivel)
+				if (_gunModifier == -1 * (_gunModifierSwivel* GameState._density))
 				{
 					_gunModifier = 0;
 				}
@@ -181,6 +183,15 @@ public class MainLoop extends Thread
 		}
 	}
 	
+	private int getEnemyGunFireRate()
+	{
+		float rate = 150 - (GameState._playerScore * .7f);
+		if (rate < 40)
+		{
+			rate = 40;
+		}
+		return (int)rate;
+	}
 	
 	/**
 	 * check for collisions between ships, bullets, etc
@@ -212,7 +223,7 @@ public class MainLoop extends Thread
 						{						
 							int diffX = Math.abs((int)(currentShip.getX() - ship.getX())); 
 							int diffY = Math.abs((int)(currentShip.getY() - ship.getY())); 
-							if (diffX <= 10 && diffY <= 10)
+							if (diffX <= (10 * GameState._density) && diffY <= (10 * GameState._density))
 							{
 //								if (GameState._muted == false)
 //								{
@@ -279,7 +290,8 @@ public class MainLoop extends Thread
 	
 	public void initGame()
 	{
-		GameState.mIsRunning = true;	
+		GameState.mIsRunning = true;
+		GameState._density = _density;
 	}
 	
 }
