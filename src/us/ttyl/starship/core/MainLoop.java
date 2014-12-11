@@ -47,6 +47,12 @@ public class MainLoop extends Thread
 			    			, GameState._weapons.get(0).getY());			    	
 				}
 				
+				
+				//generate a boss ship
+				//EnvBuilder.generateEnemyBoss(GameState._weapons.get(0).getX()
+		    	// 		, GameState._weapons.get(0).getY());	
+				
+				
 				// fire enemy guns constantly	
 				long currentTimeEnemyGun = System.currentTimeMillis();
 				if (currentTimeEnemyGun - startTimeEnemyGun > 750)
@@ -186,9 +192,9 @@ public class MainLoop extends Thread
 	private int getEnemyGunFireRate()
 	{
 		float rate = 150 - (GameState._playerScore * .7f);
-		if (rate < 40)
+		if (rate < 20)
 		{
-			rate = 40;
+			rate = 20;
 		}
 		return (int)rate;
 	}
@@ -276,8 +282,13 @@ public class MainLoop extends Thread
 									GameState._playerScore = GameState._playerScore + 1;
 									GameState._playerBulletsShot = GameState._playerBulletsShot + 1;
 								}
-								currentShip.setEndurance(0);
-								ship.setDestroyedFlag(true);
+								currentShip.decrementHitPoints(1);
+								currentShip.checkDestroyed();
+								if (currentShip.getDestroyedFlag() == true)
+								{
+									currentShip.setEndurance(0);
+									ship.setDestroyedFlag(true);
+								}
 								// System.out.println(ship.getWeaponName() + " is destroyed.");
 								break;
 							}

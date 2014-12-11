@@ -21,6 +21,7 @@ public abstract class MovementEngine
   String _name;
   int _endurance;
   MovementEngine _origin;
+  int _hitPoints = 1;
 
   public abstract void updateSpeed();
   public abstract void updateSpeedIncrease();
@@ -124,7 +125,7 @@ public abstract class MovementEngine
 
   public void checkDestroyed()
   {
-	if (_endurance == 0)
+	if (_endurance == 0 || _hitPoints == 0)
 	{
 	  _destroyed = true;
 	}
@@ -149,4 +150,15 @@ public abstract class MovementEngine
   {
 	 _endurance = endurance;
   }
+  
+  public void setHitPoints(int hitPoints)
+  {
+	  _hitPoints = hitPoints;
+  }
+  
+  public void decrementHitPoints(int damage)
+  {
+	  _hitPoints = _hitPoints - damage;
+  }
+  
 }

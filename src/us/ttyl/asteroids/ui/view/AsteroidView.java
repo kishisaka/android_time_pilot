@@ -17,6 +17,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -95,6 +96,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		};
 		//initialize sprite array
 		GameState._sprites = GameUtils.getTilesFromFile(context);
+		GameState._bossSprites = GameUtils.getBossTilesFromFile(context);
 		
 		//add player to ship list
 		MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, "player", -1); 
@@ -142,10 +144,10 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			//setup the color for all ships
 			mGunEnemy.setColor(Color.RED);
 			mGunPlayer.setColor(Color.GREEN);
-			mParticleExplosion.setColor(0xff000000);
-			mMissileSmoke1.setColor(0xffff0000);
+			mParticleExplosion.setColor(0xffff0000);
+			mMissileSmoke1.setColor(0xffffaa00);
 			mMissileSmoke2.setColor(0xffffff80);
-			mMissileSmoke3.setColor(0xff00988a);
+			mMissileSmoke3.setColor(0xffff0000);
 			mTextColor.setColor(0x7f000000);
 			mControllerColor.setColor(0x7f00988a);
 			
@@ -205,13 +207,22 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		    //draw center target (selected)
 		    //g.setColor(new Color(255,0,0));
 		    //g.fillRect(250,250,3,3);
-		    if (GameState._weapons.get(0).getDestroyedFlag() == false)
-		    {
-		    	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "player"), 232, 232, null);
-		    }
-		
 		    int density = (int)getContext().getResources().getDisplayMetrics().density;
 		    int pixelSize = 3 * density;
+		    int misslePixel = 2 * density;
+		    
+		    int centerXCanvas = (int)(mAppContext.getResources().getDisplayMetrics().widthPixels / 2);
+		    int centerYCanvas = (int)(mAppContext.getResources().getDisplayMetrics().heightPixels / 2);
+		    
+		    int canvasY = (int)(mAppContext.getResources().getDisplayMetrics().heightPixels);
+
+		    int spriteXSize = GameUtils.getImageType(me.getCurrentDirection(), "player").getWidth();
+		    int spriteYSize = GameUtils.getImageType(me.getCurrentDirection(), "player").getHeight();
+		    if (GameState._weapons.get(0).getDestroyedFlag() == false)
+		    {
+		    	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "player"), centerXCanvas - (spriteXSize/2), centerYCanvas - (spriteYSize/2), null);
+		    }
+				    
 		    //draw all other targets relative to center target, don't draw center target
 		    for (int i = 0; i < GameState._weapons.size(); i ++)
 		    {
@@ -226,31 +237,31 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        y = range * Math.sin(Math.toRadians(track));
 			        if (me.getWeaponName().equals("enemy"))
 			        {
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "enemy"),(int)(232 + x), (int)(232 - y), null);
+			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "enemy"),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
 			        }
 			        else if(me.getWeaponName().equals("gun_enemy"))
 			        {			        	
-			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(250 + pixelSize - y), mGunEnemy);
+			        	canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mGunEnemy);
 			        }
 			        else if(me.getWeaponName().equals("gun_player"))
 			        {
-			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(253 + pixelSize - y), mGunPlayer);
+			        	canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mGunPlayer);
 			        }
 			        else if(me.getWeaponName().equals("missile_player") || me.getWeaponName().equals("missile_enemy"))
 			        {
 			        	// g.setColor(new Color(0,0,0));
 			            // g.fillRect((int)(_screenSize/2 + x), (int)(_screenSize/2 - y), 3, 3);
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "missile"),(int)(232 + x), (int)(232 - y), null);
+			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "missile"),(int)(centerXCanvas + x - (18 * density)), (int)(centerYCanvas - y - (18 * density)), null);
 			        }
 			        else if(me.getWeaponName().equals("cloud"))
 			        {		        
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "cloud"),(int)(232 + x), (int)(232 - y), null);
+			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), "cloud"),(int)(centerXCanvas + x), (int)(centerYCanvas - y), null);
 			        }
 			        else if(me.getWeaponName().equals("explosion_particle"))
 			        {		        
 			        	//g.setColor(new Color(115,134,230));
 			            //g.fillRect((int)(_screenSize/2 + x), (int)(_screenSize/2 - y), 3, 3);
-			            canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(253 + pixelSize - y), mParticleExplosion);
+			            canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosion);
 			        }
 			        else if(me.getWeaponName().equals("missile_smoke"))
 			        {	
@@ -271,31 +282,38 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        		//g.setColor(new Color(0,125,255));
 			        	}
 			            // g.fillRect((int)(_screenSize/2 + x), (int)(_screenSize/2 - y), 3, 3);
-			        	canvas.drawRect((int)(250 + x), (int)(250 - y), (int)(250 + pixelSize + x), (int)(250 + pixelSize - y), smokeColor);
+			        	
+			        	int[] smokeOffset = GameUtils.getSmokeTrailXY(me.getCurrentDirection());
+			        	int x1 = (int)(centerXCanvas + x) + (density * smokeOffset[0]);
+			        	int y1 = (int)(centerYCanvas - y) + (density * smokeOffset[1]);
+			        	int x2 = x1 + misslePixel;
+			        	int y2 = y1 + misslePixel;
+			        	canvas.drawRect(x1, y1, x2, y2, smokeColor);
 			        }
 		    	}	
 		    }
 		    // g.setColor(new Color(0,152,138));	    
-		    canvas.drawText("score: " + GameState._playerScore, (int)(50) , (int)(450), mTextColor);
-		    canvas.drawText("score: " + GameState._playerScore, (int)(50) , (int)(450), mTextColor);
-		    canvas.drawText("bullet: " + GameState._playerBulletsShot, (int)(150) , (int)(450), mTextColor);
-		    canvas.drawText("enemy: " + GameState._playerEnemyShot, (int)(250) , (int)(450), mTextColor);
-		    canvas.drawText("planes left: " + GameState._lives, (int)(350) , (int)(450), mTextColor);
+		    canvas.drawText("score: " + GameState._playerScore, (int)(20 * density) , (int)(50 * density), mTextColor);
+		    canvas.drawText("bullet: " + GameState._playerBulletsShot, (int)(60 * density) , (int)(50 * density), mTextColor);
+		    canvas.drawText("enemy: " + GameState._playerEnemyShot, (int)(100 * density) , (int)(50 * density), mTextColor);
+		    canvas.drawText("planes left: " + GameState._lives, (int)(200 * density) , (int)(50 * density), mTextColor);
 		    
 		    
 		    //draw the controller circle
+		    int directionControllerSize = 100 * density;
 		    mControllerCircleX = getContext().getResources().getDisplayMetrics().widthPixels / 2;
-		    mControllerCircleY = 700;
-		    canvas.drawCircle(mControllerCircleX, mControllerCircleY, 200, mControllerColor);
+		    mControllerCircleY = canvasY - directionControllerSize - (20 * density);
+		    canvas.drawCircle(mControllerCircleX, mControllerCircleY, directionControllerSize, mControllerColor);
 		    
 		    //draw the special weapon circle
-		    mSpecialWeaponX = getContext().getResources().getDisplayMetrics().widthPixels - 100;
-		    mSpecialWeaponY = 600;
-		    canvas.drawCircle(mSpecialWeaponX, mControllerCircleY, 50, mControllerColor);
+		    int specialWeaponSize = 30 * density;
+		    mSpecialWeaponX = getContext().getResources().getDisplayMetrics().widthPixels - specialWeaponSize;
+		    mSpecialWeaponY =  canvasY - directionControllerSize;
+		    canvas.drawCircle(mSpecialWeaponX, mSpecialWeaponY, specialWeaponSize, mControllerColor);
 		    
 		    if (GameState._weapons.get(0).getWeaponName().equals("player") == false)
 		    {
-		    	canvas.drawText("Game Over", 232 , 232, mTextColor);
+		    	canvas.drawText("Game Over",  centerXCanvas, centerYCanvas, mTextColor);
 		    }
 		}
 		
@@ -332,91 +350,106 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 	@Override
     public boolean onTouchEvent(MotionEvent motionEvent)
     {
-		int x = (int)motionEvent.getX();
-		int y = (int)motionEvent.getY();
-		double rangeController = GameUtils.getRangeBetweenCoords(mControllerCircleX, mControllerCircleY, x, y);
-		double rangeSpecialWeapon = GameUtils.getRangeBetweenCoords(mSpecialWeaponX, mSpecialWeaponY, x, y);
-				
-		if (rangeController < 200)
-		{		
-			x = x - mControllerCircleX;
-			y = y - mControllerCircleY;
-			double x1 = GameUtils.getA(0, x);
-		    double y1 = GameUtils.getB(0, y);		  
-			int track = _degrev[(int)GameUtils.track(x1, y1)];		
-			GameState._weapons.get(0).setDirection(track);	
-		}
-		else if (rangeSpecialWeapon < 100)
+		int count = MotionEventCompat.getPointerCount(motionEvent);
+		
+		// get the direction and special weapon motion events if exists. 
+		for(int countIndex = 0; countIndex < count; countIndex ++)
 		{
-			if ((GameState._weapons.get(0).getWeaponName().equals("player") == false))
-			{
-				//restart game
-				GameState._lives = 2;
-				GameState._playerBulletsShot = 0;
-				GameState._playerEnemyShot = 0;
-				GameState._playerScore = 0;
-				MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, "player", -1);
-				
-				//remove all enemy guns and missiles
-				for(int i =0 ; i < GameState._weapons.size(); i ++)
-				{
-					MovementEngine enemyWeapon = GameState._weapons.get(i);
-					if (enemyWeapon.getWeaponName().equals("enenmy_gun") || enemyWeapon.getWeaponName().equals("enenmy_missile") )
-					{
-						GameState._weapons.remove(i);
-					}
-				}
-				GameState._weapons.set(0, player);	
+			int x = 0;
+			int y = 0;
+			
+			int density = (int)getContext().getResources().getDisplayMetrics().density;
+			
+			x = (int)MotionEventCompat.getX(motionEvent, countIndex);
+			y = (int)MotionEventCompat.getY(motionEvent, countIndex);
+			
+			double rangeController = GameUtils.getRangeBetweenCoords(mControllerCircleX, mControllerCircleY, x, y);
+			double rangeSpecialWeapon = GameUtils.getRangeBetweenCoords(mSpecialWeaponX, mSpecialWeaponY, x, y);
+			
+			// Log.i("kurt_test", "rangeController: " + rangeController + " | rangeSpecialWeapon: " + rangeSpecialWeapon);
+					
+			// process the events! 
+			if (rangeController <= (100 * density))
+			{		
+				x = x - mControllerCircleX;
+				y = y - mControllerCircleY;
+				double x1 = GameUtils.getA(0, x);
+			    double y1 = GameUtils.getB(0, y);		  
+				int track = _degrev[(int)GameUtils.track(x1, y1)];		
+				GameState._weapons.get(0).setDirection(track);	
 			}
-			else
+			if (rangeSpecialWeapon <= (30 * density))
 			{
-				//launch missiles
-				long currentTime = System.currentTimeMillis();
-				long timeDiff = currentTime - mMissileLastLaunch;
-				if (timeDiff > 100)
+				if ((GameState._weapons.get(0).getWeaponName().equals("player") == false))
 				{
-					mMissileLastLaunch = currentTime;
-					// find closest target			
-					Set <Integer> missleSet = new HashSet<Integer>();
+					//restart game
+					GameState._lives = 2;
+					GameState._playerBulletsShot = 0;
+					GameState._playerEnemyShot = 0;
+					GameState._playerScore = 0;
+					MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, "player", -1);
 					
-					MovementEngine closestTarget = null;
-					int closestTargetRange = Integer.MAX_VALUE;
-					
-					// select a target from weapon list
-					for(int i = 1; i < GameState._weapons.size(); i ++)
+					//remove all enemy guns and missiles
+					for(int i =0 ; i < GameState._weapons.size(); i ++)
 					{
-						MovementEngine currentShip = GameState._weapons.get(i);
-						if (currentShip.getWeaponName().equals("enemy") && missleSet.contains(currentShip.hashCode()) == false)
+						MovementEngine enemyWeapon = GameState._weapons.get(i);
+						if (enemyWeapon.getWeaponName().equals("enenmy_gun") || enemyWeapon.getWeaponName().equals("enenmy_missile") )
 						{
-							int currentRange = GameUtils.getRange(GameState._weapons.get(0), currentShip);
-							//System.out.println("currentRange: "+ currentRange);
-							if (currentRange < closestTargetRange)
-							{
-								closestTarget = currentShip;
-								closestTargetRange = currentRange;
-								missleSet.add(closestTarget.hashCode());
-							}
-						}				
+							GameState._weapons.remove(i);
+						}
 					}
-					
-					int targetTrack = (int)(GameUtils.getTargetTrack(GameState._weapons.get(0), closestTarget));
-					
-					// once the closest target is selected, launch the missile. 
-					if (closestTarget != null)
-					{					
-						MovementEngine missile = new FollowEngine(targetTrack
-								, targetTrack
-								, (int)GameState._weapons.get(0).getX(), (int)GameState._weapons.get(0).getY(), .01, 10, .1, 1
-								, "missile_player", closestTarget,  GameState._weapons.get(0), 250);  
-						GameState._weapons.add(missile);
-	//					if (GameState._muted == false)
-	//					{
-	//						GameState._audioPlayerMissile.play();
-	//					}
+					GameState._weapons.set(0, player);	
+				}
+				else
+				{
+					//launch missiles
+					long currentTime = System.currentTimeMillis();
+					long timeDiff = currentTime - mMissileLastLaunch;
+					if (timeDiff > 100)
+					{
+						mMissileLastLaunch = currentTime;
+						// find closest target			
+						Set <Integer> missleSet = new HashSet<Integer>();
+						
+						MovementEngine closestTarget = null;
+						int closestTargetRange = Integer.MAX_VALUE;
+						
+						// select a target from weapon list
+						for(int i = 1; i < GameState._weapons.size(); i ++)
+						{
+							MovementEngine currentShip = GameState._weapons.get(i);
+							if (currentShip.getWeaponName().equals("enemy") && missleSet.contains(currentShip.hashCode()) == false)
+							{
+								int currentRange = GameUtils.getRange(GameState._weapons.get(0), currentShip);
+								//System.out.println("currentRange: "+ currentRange);
+								if (currentRange < closestTargetRange)
+								{
+									closestTarget = currentShip;
+									closestTargetRange = currentRange;
+									missleSet.add(closestTarget.hashCode());
+								}
+							}				
+						}
+						
+						int targetTrack = (int)(GameUtils.getTargetTrack(GameState._weapons.get(0), closestTarget));
+						
+						// once the closest target is selected, launch the missile. 
+						if (closestTarget != null)
+						{					
+							MovementEngine missile = new FollowEngine(targetTrack
+									, targetTrack
+									, (int)GameState._weapons.get(0).getX(), (int)GameState._weapons.get(0).getY(), .01, 10, .1, 1
+									, "missile_player", closestTarget,  GameState._weapons.get(0), 250);  
+							GameState._weapons.add(missile);
+		//					if (GameState._muted == false)
+		//					{
+		//						GameState._audioPlayerMissile.play();
+		//					}
+						}
 					}
 				}
-			}
-		}	
+			}	
+		}
     	return true;
     }
 }

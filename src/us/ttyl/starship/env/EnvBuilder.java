@@ -24,8 +24,34 @@ public class EnvBuilder
 						int endurance)
 					   {
 		*/
-		GameState._weapons.add(new CircleEngine(0, 0, planetX, planetY, 1
-				, 1, 1, turnmode, ("enemy"),-1));		
+		MovementEngine circleEngine = new CircleEngine(0, 0, planetX, planetY, 1
+				, 1, 1, turnmode, ("enemy"),-1);
+		circleEngine.setHitPoints(5);
+		GameState._weapons.add(circleEngine);		
+	}
+	
+	private static void generateShipBoss(double playerPositionX, double playerPositionY, int turnmode, int speed)
+	{
+		/*
+			public LineEngine(
+			  	int direction, 
+			  	int currentDirection, 
+			  	double currentX, 
+			  	double currentY, 
+			  	double currentSpeed, 
+			  	double maxSpeed, 
+			  	double acceleration, 
+			  	int turnMode, 
+			  	String name,
+			  	MovementEngine origin, 
+			  	int endurance)
+		*/
+		int track = ((int)(Math.random() * 359));
+		double[] coord = GameUtils.getCoordsGivenTrackAndDistance(track, 300);
+		int direction = 0;
+		GameState._weapons.add(new LineEngine(direction, direction, coord[0] + playerPositionX
+				, coord[1]+playerPositionY, 1d
+				, .1d, .1d, 0, "enemy", null, -1));	
 	}
 	
 	public static void generateEnemy(double playerPositionX, double playerPositionY)
@@ -34,6 +60,14 @@ public class EnvBuilder
 		int track = ((int)(Math.random() * 359));
 		double[] coord = GameUtils.getCoordsGivenTrackAndDistance(track, 300);
 		generateShip((int)playerPositionX + coord[0], (int)playerPositionY + coord[1], 0, 10);
+	}
+	
+	public static void generateEnemyBoss(double playerPositionX, double playerPositionY)
+	{
+		// the enemy boss
+		int track = ((int)(Math.random() * 359));
+		double[] coord = GameUtils.getCoordsGivenTrackAndDistance(track, 300);
+		generateShipBoss((int)playerPositionX + coord[0], (int)playerPositionY + coord[1], 0, 10);
 	}
 	
 	public static void generateCloud(double playerPositionX, double playerPositionY, int playerTrack)
