@@ -1,6 +1,5 @@
 package us.ttyl.starship.core;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -175,6 +174,26 @@ public class GameUtils
 		}
 		return tileList;
 	}	
+	
+	public static ArrayList <Bitmap> getBossTilesFromFile(Context context)
+	{
+		ArrayList <Bitmap> tileList = new ArrayList<Bitmap>();
+		try
+		{
+			Bitmap tileMap = BitmapFactory.decodeResource(context.getResources(), R.drawable.sprites);
+			int y = 8;
+			for(int x = 0; x < 3; x ++)
+			{
+				int density = (int)context.getResources().getDisplayMetrics().density;
+				tileList.add(Bitmap.createBitmap(tileMap, x * density * 36, y * density * 72, density * 36, density * 72));								
+			}		
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return tileList;
+	}
 	
 	/**
 	 * given a track and a ship type, return the appropriate sprite for rendering
@@ -372,5 +391,77 @@ public class GameUtils
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * given a missle track, return the appropriate x,y offset for the smoke
+	 * @param track
+	 * @param type
+	 * @return sprite (BufferedImage)
+	 */
+	public static int[] getSmokeTrailXY(int track)
+	{
+		if (track >= 0 && track < 30)
+		{
+			// +3
+			return new int[]{-9, 0};
+		}
+		else if (track >= 30 && track < 60)
+		{
+			// + 2
+			return new int[]{-8, 5};
+		}
+		
+		else if (track >= 60 && track < 90)
+		{
+			// + 1
+			return new int[]{-4,7};
+		}
+		else if (track >= 90 && track < 120)
+		{
+			// 0
+			return new int[]{0,9};
+		}
+		else if (track >= 120 && track < 150)
+		{
+			// + 11
+			return new int[]{4,7};
+		}
+		else if (track >= 150 && track < 180)
+		{
+			// + 10
+			return new int[]{7,4};
+		}
+		else if (track >= 180 && track < 210)
+		{
+			// + 9
+			return new int[]{9,0};
+		}
+		else if (track >= 210 && track < 240)
+		{
+			// + 8
+			return new int[]{7,-4};
+		}
+		else if (track >= 240 && track < 270)
+		{
+			// + 7
+			return new int[]{5,-7};
+		}
+		else if (track >= 270 && track < 300)
+		{
+			// + 6
+			return new int[]{0,-9};
+		}
+		else if (track >= 300 && track < 330)
+		{
+			// + 5
+			return new int[]{-4,-7};
+		}
+		else if (track >= 330 && track < 360)
+		{
+			// + 4
+			return new int[]{-7,-4};
+		}
+		return new int[]{0,0};
 	}
 }

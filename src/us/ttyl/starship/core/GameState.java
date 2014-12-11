@@ -13,6 +13,7 @@ public class GameState
 	
 	public static Vector <MovementEngine>_weapons = new Vector<MovementEngine>();
 	public static ArrayList <Bitmap> _sprites;
+	public static ArrayList <Bitmap> _bossSprites;
 	
 	//player score
 	public static int _playerScore = 0;
