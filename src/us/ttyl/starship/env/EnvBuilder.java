@@ -1,5 +1,6 @@
 package us.ttyl.starship.env;
 
+import us.ttyl.starship.core.Constants;
 import us.ttyl.starship.core.GameState;
 import us.ttyl.starship.core.GameUtils;
 import us.ttyl.starship.movement.CircleEngine;
@@ -25,7 +26,7 @@ public class EnvBuilder
 					   {
 		*/
 		MovementEngine circleEngine = new CircleEngine(0, 0, planetX, planetY, 1
-				, 1, 1, turnmode, ("enemy"),-1);
+				, 1, 1, turnmode, (Constants.ENEMY),-1);
 		circleEngine.setHitPoints(5);
 		GameState._weapons.add(circleEngine);		
 	}
@@ -51,7 +52,7 @@ public class EnvBuilder
 		int direction = 0;
 		GameState._weapons.add(new LineEngine(direction, direction, coord[0] + playerPositionX
 				, coord[1]+playerPositionY, 1d
-				, .1d, .1d, 0, "enemy", null, -1));	
+				, .1d, .1d, 0, Constants.ENEMY, null, -1));	
 	}
 	
 	public static void generateEnemy(double playerPositionX, double playerPositionY)
@@ -95,6 +96,6 @@ public class EnvBuilder
 		}
 		GameState._weapons.add(new LineEngine(direction, direction, coord[0] + playerPositionX
 				, coord[1]+playerPositionY, 1d
-				, .1d, .1d, 0, "cloud", null, -1));	
+				, .1d, .1d, 0, Constants.CLOUD, null, -1));	
 	}
 }

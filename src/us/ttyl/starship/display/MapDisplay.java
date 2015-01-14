@@ -17,6 +17,7 @@ package us.ttyl.starship.display;
 //import javax.swing.JFrame;
 //import javax.swing.JPanel;
 
+import us.ttyl.starship.core.Constants;
 import us.ttyl.starship.core.GameState;
 import us.ttyl.starship.core.GameUtils;
 import us.ttyl.starship.movement.FollowEngine;
@@ -86,7 +87,7 @@ public class MapDisplay // extends JPanel implements KeyListener, MouseListener,
 	    //draw center target (selected)
 	    //g.setColor(new Color(255,0,0));
 	    //g.fillRect(250,250,3,3);
-	    g.drawImage(GameUtils.getImageType(me.getCurrentDirection(), "player"), 232, 232, null);
+	    g.drawImage(GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER), 232, 232, null);
 	
 	    //draw all other targets relative to center target, don't draw center target
 	    for (int i = 0; i < GameState._weapons.size(); i ++)
@@ -104,23 +105,23 @@ public class MapDisplay // extends JPanel implements KeyListener, MouseListener,
 		        //g.drawString(me.getWeaponName(), (int)(250 + x) , (int)(250 - y - 10));
 		        //g.setColor(new Color(0,255,0));
 		        //g.fillRect((int)(250 + x), (int)(250 - y), 3, 3);
-		        if (me.getWeaponName().equals("enemy"))
+		        if (me.getWeaponName().equals(Constants.ENEMY))
 		        {
-		        	g.drawImage(GameUtils.getImageType(me.getCurrentDirection(), "enemy"),(int)(232 + x), (int)(232 - y), null);
+		        	g.drawImage(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY),(int)(232 + x), (int)(232 - y), null);
 		        }
-		        else if(me.getWeaponName().equals("gun_enemy"))
+		        else if(me.getWeaponName().equals(Constants.GUN_ENEMY))
 		        {
 		        	g.setColor(new Color(255,0,0));
 		            g.fillRect((int)(250 + x), (int)(250 - y), 3, 3);
 		        }
-		        else if(me.getWeaponName().equals("gun_player"))
+		        else if(me.getWeaponName().equals(Constants.GUN_PLAYER))
 		        {
 		        	g.setColor(new Color(0,255,0));
 		            g.fillRect((int)(250 + x), (int)(250 - y), 3, 3);
 		        }
-		        else if(me.getWeaponName().equals("cloud"))
+		        else if(me.getWeaponName().equals(Constants.CLOUD))
 		        {		        
-		        	g.drawImage(GameUtils.getImageType(me.getCurrentDirection(), "cloud"),(int)(232 + x), (int)(232 - y), null);
+		        	g.drawImage(GameUtils.getImageType(me.getCurrentDirection(), Constants.CLOUD),(int)(232 + x), (int)(232 - y), null);
 		        }
 	    	}	
 	    }
@@ -189,7 +190,7 @@ public class MapDisplay // extends JPanel implements KeyListener, MouseListener,
 			double b = GameUtils.getB(GameState._weapons.get(0).getY(), _selectedTarget.getY());
 			double track = GameUtils.track(a, b);
 			MovementEngine missile = new FollowEngine((int)track, (int)track, (int)GameState._weapons.get(0).getX()
-					, (int)GameState._weapons.get(0).getY(), 1, 10, 1, 1, "missile", _selectedTarget,  GameState._weapons.get(0), 1000);  
+					, (int)GameState._weapons.get(0).getY(), 1, 10, 1, 1, Constants.MISSILE", _selectedTarget,  GameState._weapons.get(0), 1000);  
 			GameState._weapons.add(missile);
 		}
 		

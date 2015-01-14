@@ -30,6 +30,7 @@ public abstract class MovementEngine
   public abstract void updateDisplacement();
   public abstract void updateFuelUsage();
   public abstract void doOther();
+  public abstract void onCollision(MovementEngine engine1, MovementEngine engine2);
   
   public double getAcceleration()
   {
@@ -160,5 +161,4 @@ public abstract class MovementEngine
   {
 	  _hitPoints = _hitPoints - damage;
   }
-  
 }

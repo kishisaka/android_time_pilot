@@ -52,4 +52,10 @@ public class PlanetEngine extends MovementEngine
 	{
 		// TODO Auto-generated method stub
 	}
+
+	@Override
+	public void onCollision(MovementEngine engine1, MovementEngine engine2) {
+		// TODO Auto-generated method stub
+		
+	}
 }

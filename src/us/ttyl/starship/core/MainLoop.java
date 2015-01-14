@@ -1,5 +1,6 @@
 package us.ttyl.starship.core;
 
+import android.util.Log;
 import us.ttyl.starship.env.EnvBuilder;
 import us.ttyl.starship.listener.GameStateListener;
 import us.ttyl.starship.movement.FollowEngine;
@@ -38,7 +39,7 @@ public class MainLoop extends Thread
 			try
 			{				
 		    	//generate a new ship. 	
-		    	int enemyCount = GameUtils.getTypeCount("enemy"); 
+		    	int enemyCount = GameUtils.getTypeCount(Constants.ENEMY); 
 		    	// System.out.println("enemyCount: " + enemyCount);
 				if (currentTime - startTime > 300 && enemyCount < 4)
 				{
@@ -55,48 +56,53 @@ public class MainLoop extends Thread
 				
 				// fire enemy guns constantly	
 				long currentTimeEnemyGun = System.currentTimeMillis();
-				if (currentTimeEnemyGun - startTimeEnemyGun > 750)
+				if (currentTimeEnemyGun - startTimeEnemyGun > 350)
 				{
 					for(int i = 0; i < GameState._weapons.size(); i ++)
 					{
-						// guns fire guns until player reaches 500
 						if ((int)(Math.random() * 100) > getEnemyGunFireRate())
 						{
-							if (GameState._weapons.get(i).getWeaponName().equals("enemy"))
+							if (Math.random() * 100 > 50)
 							{
-								startTimeEnemyGun = currentTimeEnemyGun;
-								
-								// get player track
-								int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));
-								
-								MovementEngine bullet = new LineEngine(targetTrack, targetTrack
-										, (int)GameState._weapons.get(i).getX()
-										, (int)GameState._weapons.get(i).getY(),3, 3, 1, 1, "gun_enemy", GameState._weapons.get(0), 200);  
-								GameState._weapons.add(bullet);
-//								if (GameState._muted == false)
-//								{
-//									GameState._audioPlayerEnemyShot.play();
-//								}
+								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY))
+								{
+									startTimeEnemyGun = currentTimeEnemyGun;
+									
+									// get player track
+									int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));
+																							
+									MovementEngine bullet = new LineEngine(targetTrack, targetTrack
+											, (int)GameState._weapons.get(i).getX() 
+											, (int)GameState._weapons.get(i).getY()
+											, 4, 4, 1, 1
+											, Constants.GUN_ENEMY, GameState._weapons.get(i), 200);  
+									GameState._weapons.add(bullet);
+		//								if (GameState._muted == false)
+		//								{
+		//									GameState._audioPlayerEnemyShot.play();
+		//								}
+								}
 							}
-						}
-						// enemey fires guns and homing missiles if player has more than 500 points
-						if ((int)(Math.random() * 100) > getEnemyGunFireRate())
-						{
-							if (GameState._weapons.get(i).getWeaponName().equals("enemy"))
-							{
-								startTimeEnemyGun = currentTimeEnemyGun;
-								
-								// get player track
-								int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));
-								
-								MovementEngine bullet = new FollowEngine(targetTrack, targetTrack
-										, (int)GameState._weapons.get(i).getX()
-										, (int)GameState._weapons.get(i).getY(),3, 3, 1, 1, "missile_enemy", GameState._weapons.get(0), GameState._weapons.get(i), 200);  
-								GameState._weapons.add(bullet);
-//								if (GameState._muted == false)
-//								{
-//									GameState._audioPlayerMissile.play();
-//								}
+							else
+							{					
+								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY))
+								{
+									startTimeEnemyGun = currentTimeEnemyGun;
+									
+									// get player track
+									int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));								
+									
+									MovementEngine missile = new FollowEngine(targetTrack, targetTrack
+											, (int)GameState._weapons.get(i).getX()
+											, (int)GameState._weapons.get(i).getY()
+											, GameState._weapons.get(i).getCurrentSpeed(), 3, 1, 1
+											, Constants.MISSILE_ENEMY, GameState._weapons.get(0), GameState._weapons.get(i), 200);  
+									GameState._weapons.add(missile);
+		//								if (GameState._muted == false)
+		//								{
+		//									GameState._audioPlayerMissile.play();
+		//								}
+								}
 							}
 						}
 					}
@@ -104,7 +110,7 @@ public class MainLoop extends Thread
 				
 				// fire gun constantly
 				// System.out.println("gunModifier:" + _gunModifier);
-				if (GameState._weapons.get(0).getDestroyedFlag() == false && (GameState._weapons.get(0).getWeaponName().equals("player")))
+				if (GameState._weapons.get(0).getDestroyedFlag() == false && (GameState._weapons.get(0).getWeaponName().equals(Constants.PLAYER)))
 				{
 					long currentTimeGun = currentTime;
 					if (currentTimeGun - startTimeGun > 50)
@@ -112,14 +118,14 @@ public class MainLoop extends Thread
 						startTimeGun = currentTimeGun;
 						MovementEngine bullet = new LineEngine(GameState._weapons.get(0).getCurrentDirection() + _gunModifier, GameState._weapons.get(0).getCurrentDirection() + _gunModifier
 								, (int)GameState._weapons.get(0).getX()
-								, (int)GameState._weapons.get(0).getY(),8, 8, 1, 1, "gun_player", GameState._weapons.get(0), 200);  
+								, (int)GameState._weapons.get(0).getY(),8, 8, 1, 1, Constants.GUN_PLAYER, GameState._weapons.get(0), 200);  
 						GameState._weapons.add(bullet);
 						gunModifier();
 					}					
 				}
 				
 				//create clouds 
-				int cloundCount = GameUtils.getTypeCount("cloud"); 
+				int cloundCount = GameUtils.getTypeCount(Constants.CLOUD); 
 				long currentTimeClouds = currentTime;
 				if (currentTimeClouds - startTimeClouds > 1000 && cloundCount < 6)
 				{
@@ -131,12 +137,12 @@ public class MainLoop extends Thread
 				for(int i = 0; i < GameState._weapons.size(); i ++)
 		    	{		    		
 		    		MovementEngine ship = GameState._weapons.get(i);
-		    		if(ship.getWeaponName().equals("missile_player") || ship.getWeaponName().equals("missile_enemy"))
+		    		if(ship.getWeaponName().equals(Constants.MISSILE_PLAYER) || ship.getWeaponName().equals(Constants.MISSILE_ENEMY))
 					{
 		    			// make smoke trail
 		    			MovementEngine missileSmokeTrail = new LineEngine(ship.getCurrentDirection(), ship.getCurrentDirection()
 								, (int)ship.getX()
-								, (int)ship.getY(),0, 0, 0, 0, "missile_smoke", ship, 5);   		    			
+								, (int)ship.getY(),0, 0, 0, 0, Constants.MISSILE_SMOKE, ship, 5);   		    			
 		    			GameState._weapons.add(missileSmokeTrail);
 					}
 		    		ship.run();		    		
@@ -191,7 +197,7 @@ public class MainLoop extends Thread
 	
 	private int getEnemyGunFireRate()
 	{
-		float rate = 150 - (GameState._playerScore * .7f);
+		float rate = 115 - (GameState._playerScore * .2f);
 		if (rate < 20)
 		{
 			rate = 20;
@@ -206,9 +212,9 @@ public class MainLoop extends Thread
 	private void checkCollisions(MovementEngine currentShip)
 	{			
 		//ignore clouds and explosions and smoke trail
-		if (currentShip.getWeaponName().equals("explosion_particle") == false 
-				&& currentShip.getWeaponName().equals("cloud") == false
-				&& currentShip.getWeaponName().equals("missile_smoke") == false)
+		if (currentShip.getWeaponName().equals(Constants.EXPLOSION_PARTICLE) == false 
+				&& currentShip.getWeaponName().equals(Constants.CLOUD) == false
+				&& currentShip.getWeaponName().equals(Constants.MISSILE_SMOKE) == false)
 		{
 			for(int i = 0; i < GameState._weapons.size(); i ++)
 			{		
@@ -217,11 +223,11 @@ public class MainLoop extends Thread
 				if (currentShip.getOrigin() != null)
 				{							
 					// ignore cloud, explosions and own ship and smoke trail
-					if (ship.getWeaponName().equals("explosion_particle") == false 
-							&& ship.getWeaponName().equals("missile_player") == false
-							&& ship.getWeaponName().equals("gun_player") == false
-							&& ship.getWeaponName().equals("cloud") == false
-							&& ship.getWeaponName().equals("missile_smoke") == false)
+					if (ship.getWeaponName().equals(Constants.EXPLOSION_PARTICLE) == false 
+							&& ship.getWeaponName().equals(Constants.CLOUD) == false
+							&& ship.getWeaponName().equals(Constants.MISSILE_PLAYER) == false
+							&& ship.getWeaponName().equals(Constants.GUN_PLAYER) == false							
+							&& ship.getWeaponName().equals(Constants.MISSILE_SMOKE) == false)
 					{
 						if (currentShip.getOrigin().getWeaponName().equals(ship.getWeaponName()) == false 
 								&& currentShip.getWeaponName().equals(ship.getWeaponName()) == false
@@ -236,9 +242,12 @@ public class MainLoop extends Thread
 //									GameState._audioPlayerEnemyDeath.play();
 //								}								
 								
-								if (ship.getWeaponName().equals("enemy") || ship.getWeaponName().equals("player") || currentShip.getWeaponName().equals("player"))
+								if (ship.getWeaponName().equals(Constants.ENEMY) 
+										|| ship.getWeaponName().equals(Constants.PLAYER) 
+										|| currentShip.getWeaponName().equals(Constants.PLAYER))
 								{									
-									if ((currentShip.getWeaponName().equals("player") || ship.getWeaponName().equals("player")) 
+									if ((currentShip.getWeaponName().equals(Constants.PLAYER) 
+											|| ship.getWeaponName().equals(Constants.PLAYER)) 
 											&& GameState._weapons.get(0).getDestroyedFlag() == false)
 									{
 										GameState._weapons.get(0).set_desiredSpeed(0);
@@ -273,11 +282,11 @@ public class MainLoop extends Thread
 										int particleSpeed = (int)(Math.random() * 10);
 										int particleEndurance = (int)(Math.random() * 50);
 										MovementEngine explosionParticle = new LineEngine(particleDirection, particleDirection
-												, ship.getX(), ship.getY(), particleSpeed, 1, 1, 1, "explosion_particle", GameState._weapons.get(0), particleEndurance); 
+												, ship.getX(), ship.getY(), particleSpeed, 1, 1, 1, Constants.EXPLOSION_PARTICLE, GameState._weapons.get(0), particleEndurance); 
 										GameState._weapons.add(explosionParticle);
 									}
 								}
-								if (ship.getWeaponName().equals("gun_enemy"))
+								if (ship.getWeaponName().equals(Constants.GUN_ENEMY) && GameState._weapons.get(0).getDestroyedFlag() == false)
 								{
 									GameState._playerScore = GameState._playerScore + 1;
 									GameState._playerBulletsShot = GameState._playerBulletsShot + 1;
@@ -304,5 +313,4 @@ public class MainLoop extends Thread
 		GameState.mIsRunning = true;
 		GameState._density = _density;
 	}
-	
 }

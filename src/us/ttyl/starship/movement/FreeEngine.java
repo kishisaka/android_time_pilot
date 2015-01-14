@@ -103,6 +103,12 @@ public class FreeEngine extends MovementEngine
 		
 	}
 
+	@Override
+	public void onCollision(MovementEngine engine1, MovementEngine engine2) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
   
 	/*

@@ -29,7 +29,7 @@ public class Game extends Thread
 	public void init()
 	{		
 		GameState._sprites = GameUtils.getTilesFromFile();
-		MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, "player", -1); 
+		MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1); 
 		GameState._weapons.add(player);		 			
 	}
 	

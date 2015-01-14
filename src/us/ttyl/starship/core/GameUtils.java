@@ -18,10 +18,14 @@ public class GameUtils
 	}
 	
 	public static double getTargetTrack(MovementEngine origin, MovementEngine target)
-	{
-		double a = getA(origin.getX(), target.getX());
-		double b = getB(origin.getY(), target.getY());
-		return track(a, b);
+	{ 
+		if (origin != null && target != null)
+		{
+			double a = getA(origin.getX(), target.getX());
+			double b = getB(origin.getY(), target.getY());
+			return track(a, b);
+		}
+		return -1;
 	}
 	
 	public static double getA(double centerX, double targetX)
@@ -44,19 +48,19 @@ public class GameUtils
 	{
 		if (track == 90)
 		{
-			return new double[]{0,300};
+			return new double[]{0,distance};
 		}
 		if (track == 180)
 		{
-			return new double[]{-300,0};
+			return new double[]{-1 * distance,0};
 		}
 		if (track == 270)
 		{
-			return new double[]{0,-300};
+			return new double[]{0,-1 * distance};
 		}
 		if (track == 360)
 		{
-			return new double[]{300,0};
+			return new double[]{distance,0};
 		}
 		
 		double[] coord = new double[2];
@@ -132,7 +136,7 @@ public class GameUtils
 	}
 	
 	/**
-	 * get ship type count ("gun", "enemy")
+	 * get ship type count (gun, enemy)
 	 * @param name
 	 * @return ship count
 	 */
@@ -205,36 +209,36 @@ public class GameUtils
 	{
 		int missleRow = 12 * 12;
 		
-		if (type.equals("cloud"))
+		if (type.equals(Constants.CLOUD))
 		{
 			return GameState._sprites.get(7*12);
 		}
 		else if (track >= 0 && track < 30)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(3);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(15);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 3);
 			}
 		}
 		else if (track >= 30 && track < 60)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(2);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(14);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 2);
 			}
@@ -242,150 +246,150 @@ public class GameUtils
 		
 		else if (track >= 60 && track < 90)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(1);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(13);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 1);
 			}
 		}
 		else if (track >= 90 && track < 120)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(0);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(12);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 0);
 			}
 		}
 		else if (track >= 120 && track < 150)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(11);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(23);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 11);
 			}
 		}
 		else if (track >= 150 && track < 180)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(10);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(22);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 10);
 			}
 		}
 		else if (track >= 180 && track < 210)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(9);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(21);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 9);
 			}
 		}
 		else if (track >= 210 && track < 240)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(8);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(20);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 8);
 			}
 		}
 		else if (track >= 240 && track < 270)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(7);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(19);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 7);
 			}
 		}
 		else if (track >= 270 && track < 300)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(6);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(18);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 6);
 			}
 		}
 		else if (track >= 300 && track < 330)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(5);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(17);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 5);
 			}
 		}
 		else if (track >= 330 && track < 360)
 		{
-			if (type.equals("player"))
+			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(4);
 			}
-			else if (type.equals("enemy"))
+			else if (type.equals(Constants.ENEMY))
 			{
 				return GameState._sprites.get(16);
 			}
-			else if (type.equals("missile"))
+			else if (type.equals(Constants.MISSILE))
 			{
 				return GameState._sprites.get(missleRow + 4);
 			}

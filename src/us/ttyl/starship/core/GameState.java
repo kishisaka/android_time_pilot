@@ -28,4 +28,7 @@ public class GameState
 	
 	//screen density
 	public static int _density = 1;
+	
+	public static float mPressure;
+	public static float mTemp;
 }
