@@ -179,6 +179,11 @@ public class GameUtils
 		return tileList;
 	}	
 	
+	/**
+	 * load boss ship sprites, row 7, 72 x 36
+	 * @param context
+	 * @return
+	 */
 	public static ArrayList <Bitmap> getBossTilesFromFile(Context context)
 	{
 		ArrayList <Bitmap> tileList = new ArrayList<Bitmap>();
@@ -186,10 +191,10 @@ public class GameUtils
 		{
 			Bitmap tileMap = BitmapFactory.decodeResource(context.getResources(), R.drawable.sprites);
 			int y = 8;
-			for(int x = 0; x < 3; x ++)
+			for(int x = 0; x < 6; x ++)
 			{
 				int density = (int)context.getResources().getDisplayMetrics().density;
-				tileList.add(Bitmap.createBitmap(tileMap, x * density * 36, y * density * 72, density * 36, density * 72));								
+				tileList.add(Bitmap.createBitmap(tileMap, x * density * 72, y * density * 36, density * 72, density * 36));								
 			}		
 		}
 		catch (Exception e)
@@ -213,13 +218,21 @@ public class GameUtils
 		{
 			return GameState._sprites.get(7*12);
 		}
+		else if (type.equals(Constants.ENEMY_BOSS) && track == 0)
+		{
+			return GameState._bossSprites.get(1);
+		}
+		else if (type.equals(Constants.ENEMY_BOSS) && track == 180)
+		{
+			return GameState._bossSprites.get(5);
+		}
 		else if (track >= 0 && track < 30)
 		{
 			if (type.equals(Constants.PLAYER))
 			{
 				return GameState._sprites.get(3);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(15);
 			}
@@ -234,7 +247,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(2);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(14);
 			}
@@ -250,7 +263,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(1);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(13);
 			}
@@ -265,7 +278,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(0);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(12);
 			}
@@ -280,7 +293,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(11);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(23);
 			}
@@ -295,7 +308,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(10);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(22);
 			}
@@ -310,7 +323,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(9);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(21);
 			}
@@ -325,7 +338,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(8);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(20);
 			}
@@ -340,7 +353,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(7);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(19);
 			}
@@ -355,7 +368,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(6);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(18);
 			}
@@ -370,7 +383,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(5);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(17);
 			}
@@ -385,7 +398,7 @@ public class GameUtils
 			{
 				return GameState._sprites.get(4);
 			}
-			else if (type.equals(Constants.ENEMY))
+			else if (type.equals(Constants.ENEMY_FIGHTER))
 			{
 				return GameState._sprites.get(16);
 			}
