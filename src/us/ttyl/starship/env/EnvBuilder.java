@@ -26,8 +26,7 @@ public class EnvBuilder
 					   {
 		*/
 		MovementEngine circleEngine = new CircleEngine(0, 0, planetX, planetY, 1
-				, 1, 1, turnmode, (Constants.ENEMY),-1);
-		circleEngine.setHitPoints(5);
+				, 1, 1, turnmode, (Constants.ENEMY_FIGHTER),-1);
 		GameState._weapons.add(circleEngine);		
 	}
 	
@@ -47,12 +46,29 @@ public class EnvBuilder
 			  	MovementEngine origin, 
 			  	int endurance)
 		*/
-		int track = ((int)(Math.random() * 359));
-		double[] coord = GameUtils.getCoordsGivenTrackAndDistance(track, 300);
-		int direction = 0;
-		GameState._weapons.add(new LineEngine(direction, direction, coord[0] + playerPositionX
-				, coord[1]+playerPositionY, 1d
-				, .1d, .1d, 0, Constants.ENEMY, null, -1));	
+		
+		int direction = 180;
+		int xOffset = 400;
+		if (Math.random() * 100 > 50)
+		{
+			direction = 0;
+			xOffset = -400;
+		}
+		boolean found = false;
+		for(MovementEngine engine:GameState._weapons)
+		{
+			if (engine.getWeaponName().equals(Constants.ENEMY_BOSS))
+			{
+				found = true;
+				break;
+			}
+		}
+		if (found == false)
+		{
+			GameState._weapons.add(new LineEngine(direction, direction, playerPositionX + xOffset
+					, playerPositionY, speed
+					, speed, speed, turnmode, Constants.ENEMY_BOSS, null, -1, 25));	
+		}
 	}
 	
 	public static void generateEnemy(double playerPositionX, double playerPositionY)
@@ -63,12 +79,10 @@ public class EnvBuilder
 		generateShip((int)playerPositionX + coord[0], (int)playerPositionY + coord[1], 0, 10);
 	}
 	
-	public static void generateEnemyBoss(double playerPositionX, double playerPositionY)
+	public static void generateEnemyBoss(double playerPositionX, double playerPositionY )
 	{
 		// the enemy boss
-		int track = ((int)(Math.random() * 359));
-		double[] coord = GameUtils.getCoordsGivenTrackAndDistance(track, 300);
-		generateShipBoss((int)playerPositionX + coord[0], (int)playerPositionY + coord[1], 0, 10);
+		generateShipBoss((int)playerPositionX, (int)playerPositionY, 1, 1);
 	}
 	
 	public static void generateCloud(double playerPositionX, double playerPositionY, int playerTrack)
@@ -96,6 +110,6 @@ public class EnvBuilder
 		}
 		GameState._weapons.add(new LineEngine(direction, direction, coord[0] + playerPositionX
 				, coord[1]+playerPositionY, 1d
-				, .1d, .1d, 0, Constants.CLOUD, null, -1));	
+				, .1d, .1d, 0, Constants.CLOUD, null, -1, 1));	
 	}
 }

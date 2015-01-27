@@ -20,7 +20,8 @@ public class LineEngine extends MovementEngine
 	  	int turnMode, 
 	  	String name,
 	  	MovementEngine origin, 
-	  	int endurance)
+	  	int endurance,
+	  	int hitpoints)
 	{
 	    _name = name;
 	    _direction = direction;
@@ -34,6 +35,7 @@ public class LineEngine extends MovementEngine
 	    _turnMode = turnMode;
 		_endurance = endurance;
 		_origin = origin;
+		_hitPoints = hitpoints;
 	}
 	
 	@Override

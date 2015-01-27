@@ -1,5 +1,8 @@
 package us.ttyl.starship.movement;
 
+import us.ttyl.starship.core.Constants;
+import android.util.Log;
+
 /**
  * all engines extend this and override the movement methods. 
  * @author kurt ishisaka
@@ -128,7 +131,9 @@ public abstract class MovementEngine
   {
 	if (_endurance == 0 || _hitPoints == 0)
 	{
-	  _destroyed = true;
+		_endurance = 0;
+		_hitPoints = 0;
+		_destroyed = true;
 	}
   }
 
@@ -159,6 +164,6 @@ public abstract class MovementEngine
   
   public void decrementHitPoints(int damage)
   {
-	  _hitPoints = _hitPoints - damage;
+	  _hitPoints = _hitPoints - damage;	  
   }
 }

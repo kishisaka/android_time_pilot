@@ -31,6 +31,7 @@ public class MainLoop extends Thread
 		long startTimeGun = startTime;
 		long startTimeEnemyGun = startTime;
 		long startTimeClouds = startTime;
+		long startTimeBoss = startTime;
 		
 		//main game loop
 		while(GameState.mIsRunning == true)
@@ -39,7 +40,7 @@ public class MainLoop extends Thread
 			try
 			{				
 		    	//generate a new ship. 	
-		    	int enemyCount = GameUtils.getTypeCount(Constants.ENEMY); 
+		    	int enemyCount = GameUtils.getTypeCount(Constants.ENEMY_FIGHTER); 
 		    	// System.out.println("enemyCount: " + enemyCount);
 				if (currentTime - startTime > 300 && enemyCount < 4)
 				{
@@ -48,11 +49,13 @@ public class MainLoop extends Thread
 			    			, GameState._weapons.get(0).getY());			    	
 				}
 				
-				
-				//generate a boss ship
-				//EnvBuilder.generateEnemyBoss(GameState._weapons.get(0).getX()
-		    	// 		, GameState._weapons.get(0).getY());	
-				
+				//generate a boss ship				
+				if ((currentTime - startTimeBoss) > 3000)
+				{
+					EnvBuilder.generateEnemyBoss(GameState._weapons.get(0).getX()
+					 		, GameState._weapons.get(0).getY());
+					startTimeBoss = currentTime;
+				}				
 				
 				// fire enemy guns constantly	
 				long currentTimeEnemyGun = System.currentTimeMillis();
@@ -64,7 +67,7 @@ public class MainLoop extends Thread
 						{
 							if (Math.random() * 100 > 50)
 							{
-								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY))
+								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY_FIGHTER))
 								{
 									startTimeEnemyGun = currentTimeEnemyGun;
 									
@@ -75,7 +78,7 @@ public class MainLoop extends Thread
 											, (int)GameState._weapons.get(i).getX() 
 											, (int)GameState._weapons.get(i).getY()
 											, 4, 4, 1, 1
-											, Constants.GUN_ENEMY, GameState._weapons.get(i), 200);  
+											, Constants.GUN_ENEMY, GameState._weapons.get(i), 200, 1);  
 									GameState._weapons.add(bullet);
 		//								if (GameState._muted == false)
 		//								{
@@ -85,7 +88,7 @@ public class MainLoop extends Thread
 							}
 							else
 							{					
-								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY))
+								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY_FIGHTER))
 								{
 									startTimeEnemyGun = currentTimeEnemyGun;
 									
@@ -118,7 +121,7 @@ public class MainLoop extends Thread
 						startTimeGun = currentTimeGun;
 						MovementEngine bullet = new LineEngine(GameState._weapons.get(0).getCurrentDirection() + _gunModifier, GameState._weapons.get(0).getCurrentDirection() + _gunModifier
 								, (int)GameState._weapons.get(0).getX()
-								, (int)GameState._weapons.get(0).getY(),8, 8, 1, 1, Constants.GUN_PLAYER, GameState._weapons.get(0), 200);  
+								, (int)GameState._weapons.get(0).getY(),8, 8, 1, 1, Constants.GUN_PLAYER, GameState._weapons.get(0), 200, 1);  
 						GameState._weapons.add(bullet);
 						gunModifier();
 					}					
@@ -142,7 +145,7 @@ public class MainLoop extends Thread
 		    			// make smoke trail
 		    			MovementEngine missileSmokeTrail = new LineEngine(ship.getCurrentDirection(), ship.getCurrentDirection()
 								, (int)ship.getX()
-								, (int)ship.getY(),0, 0, 0, 0, Constants.MISSILE_SMOKE, ship, 5);   		    			
+								, (int)ship.getY(),0, 0, 0, 0, Constants.MISSILE_SMOKE, ship, 5, 1);   		    			
 		    			GameState._weapons.add(missileSmokeTrail);
 					}
 		    		ship.run();		    		
@@ -150,6 +153,15 @@ public class MainLoop extends Thread
 		    	}
 				
 				//check destroyed and remove from list if so, remove all objects that are over 450 units away from the player
+				for(int i = 1; i < GameState._weapons.size(); i ++)
+		    	{
+					if ((i > 0 && GameUtils.getRange(GameState._weapons.get(0), GameState._weapons.get(i)) > 450) 
+							|| (GameState._weapons.get(i).getDestroyedFlag() == true))
+					{
+						GameState._weapons.remove(i);
+					}		    		
+		    	}
+				
 				for(int i = 1; i < GameState._weapons.size(); i ++)
 		    	{
 					if ((i > 0 && GameUtils.getRange(GameState._weapons.get(0), GameState._weapons.get(i)) > 450) 
@@ -242,7 +254,8 @@ public class MainLoop extends Thread
 //									GameState._audioPlayerEnemyDeath.play();
 //								}								
 								
-								if (ship.getWeaponName().equals(Constants.ENEMY) 
+								if (ship.getWeaponName().equals(Constants.ENEMY_FIGHTER)
+										|| ship.getWeaponName().equals(Constants.ENEMY_BOSS)
 										|| ship.getWeaponName().equals(Constants.PLAYER) 
 										|| currentShip.getWeaponName().equals(Constants.PLAYER))
 								{									
@@ -282,21 +295,16 @@ public class MainLoop extends Thread
 										int particleSpeed = (int)(Math.random() * 10);
 										int particleEndurance = (int)(Math.random() * 50);
 										MovementEngine explosionParticle = new LineEngine(particleDirection, particleDirection
-												, ship.getX(), ship.getY(), particleSpeed, 1, 1, 1, Constants.EXPLOSION_PARTICLE, GameState._weapons.get(0), particleEndurance); 
+												, ship.getX(), ship.getY(), particleSpeed, 1, 1, 1, Constants.EXPLOSION_PARTICLE
+												, GameState._weapons.get(0), particleEndurance, 1); 
 										GameState._weapons.add(explosionParticle);
 									}
-								}
-								if (ship.getWeaponName().equals(Constants.GUN_ENEMY) && GameState._weapons.get(0).getDestroyedFlag() == false)
-								{
-									GameState._playerScore = GameState._playerScore + 1;
-									GameState._playerBulletsShot = GameState._playerBulletsShot + 1;
-								}
-								currentShip.decrementHitPoints(1);
-								currentShip.checkDestroyed();
-								if (currentShip.getDestroyedFlag() == true)
-								{
-									currentShip.setEndurance(0);
-									ship.setDestroyedFlag(true);
+									
+									//decrement hitPoints and checkDestroyed on currentShip and ship 
+									currentShip.decrementHitPoints(1);
+									currentShip.checkDestroyed();
+									ship.decrementHitPoints(1);
+									ship.checkDestroyed();
 								}
 								// System.out.println(ship.getWeaponName() + " is destroyed.");
 								break;

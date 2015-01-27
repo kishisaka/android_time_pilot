@@ -92,7 +92,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 				{
 					MovementEngine enemyWeapon = GameState._weapons.get(i);
 					if (enemyWeapon.getWeaponName().equals(Constants.GUN_ENEMY) || enemyWeapon.getWeaponName().equals(Constants.MISSILE_ENEMY)
-							|| enemyWeapon.getWeaponName().equals(Constants.ENEMY))
+							|| enemyWeapon.getWeaponName().equals(Constants.ENEMY_FIGHTER))
 					{
 						GameState._weapons.remove(i);
 					}
@@ -228,7 +228,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		    {
 		    	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER), centerXCanvas - (spriteXSize/2), centerYCanvas - (spriteYSize/2), null);
 		    }
-				    
+		    
 		    //draw all other targets relative to center target, don't draw center target
 		    for (int i = 0; i < GameState._weapons.size(); i ++)
 		    {
@@ -241,9 +241,13 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        double range = getRange(x, y);
 			        x = range * Math.cos(Math.toRadians(track));
 			        y = range * Math.sin(Math.toRadians(track));
-			        if (me.getWeaponName().equals(Constants.ENEMY))
+			        if (me.getWeaponName().equals(Constants.ENEMY_FIGHTER))
 			        {
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
+			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY_FIGHTER),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
+			        }
+			        if (me.getWeaponName().equals(Constants.ENEMY_BOSS))
+			        {
+			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY_BOSS),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
 			        }
 			        else if(me.getWeaponName().equals(Constants.GUN_ENEMY))
 			        {			        	
@@ -258,14 +262,14 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.MISSILE),(int)(centerXCanvas + x - (18 * density)), (int)(centerYCanvas - y - (18 * density)), null);
 			        }
 			        else if(me.getWeaponName().equals(Constants.CLOUD))
-			        {		        
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.CLOUD),(int)(centerXCanvas + x), (int)(centerYCanvas - y), null);
-			        }
-			        else if(me.getWeaponName().equals(Constants.EXPLOSION_PARTICLE))
-			        {		        
-			            canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosion);
-			        }
-			        else if(me.getWeaponName().equals(Constants.MISSILE_SMOKE))
+			    	{		        
+			    		canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.CLOUD),(int)(centerXCanvas + x), (int)(centerYCanvas - y), null);
+			    	}
+			    	else if(me.getWeaponName().equals(Constants.EXPLOSION_PARTICLE))
+			    	{		        
+			    		canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosion);
+			    	}
+			    	else if(me.getWeaponName().equals(Constants.MISSILE_SMOKE))
 			        {	
 			        	Paint smokeColor = null;
 			        	if (me.getEndurance() > 10)
@@ -416,7 +420,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 						for(int i = 1; i < GameState._weapons.size(); i ++)
 						{
 							MovementEngine currentShip = GameState._weapons.get(i);
-							if (currentShip.getWeaponName().equals(Constants.ENEMY) && missleSet.contains(currentShip.hashCode()) == false)
+							if (currentShip.getWeaponName().equals(Constants.ENEMY_FIGHTER) && missleSet.contains(currentShip.hashCode()) == false)
 							{
 								int currentRange = GameUtils.getRange(GameState._weapons.get(0), currentShip);
 								//System.out.println("currentRange: "+ currentRange);
