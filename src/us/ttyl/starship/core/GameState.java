@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import android.graphics.Bitmap;
+import android.media.SoundPool;
 import us.ttyl.starship.movement.MovementEngine;
 
 public class GameState 
@@ -21,7 +22,7 @@ public class GameState
 	public static int _enemiesShotDown = 0;
 	public static int _playerScore = 0;
 	public static int _playerBulletsShot = 0;
-	public static int _playerEnemyShot = 0;
+	public static int _playerEnemyShot = 0; 
 	
 	//sound settings
 	public static boolean _muted = false;
@@ -32,7 +33,11 @@ public class GameState
 	//screen density
 	public static int _density = 1;
 	
-	public static float mPressure;
-	public static float mTemp;
+	public static float sPressure;
+	public static float sTemp;
+	
+	//sounds
+	public static SoundPool sSoundPool;
+	public static int sPlayerGunSoundId;
 }
 

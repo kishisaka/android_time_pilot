@@ -5,11 +5,20 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import us.ttyl.asteroids.R;
 import us.ttyl.starship.movement.MovementEngine;
 
 public class GameUtils 
 {	
+	/**
+	 * get a deg track of a set of coords from a set of coords
+	 * @param centerX
+	 * @param centerY
+	 * @param targetX
+	 * @param targetY
+	 * @return
+	 */
 	public static double track(double centerX, double centerY, double targetX, double targetY)
 	{
 		double x = getA(centerX, targetX);
@@ -17,6 +26,12 @@ public class GameUtils
 		return track(x, y);
 	}
 	
+	/**
+	 * get a deg track of a target from an origin
+	 * @param origin
+	 * @param target
+	 * @return
+	 */
 	public static double getTargetTrack(MovementEngine origin, MovementEngine target)
 	{ 
 		if (origin != null && target != null)
@@ -180,7 +195,7 @@ public class GameUtils
 	}	
 	
 	/**
-	 * load boss ship sprites, row 7, 72 x 36
+	 * load boss ship sprites, row 8, 72 x 36
 	 * @param context
 	 * @return
 	 */
@@ -217,6 +232,10 @@ public class GameUtils
 		if (type.equals(Constants.CLOUD))
 		{
 			return GameState._sprites.get(7*12);
+		}		
+		else if (type.equals(Constants.PARACHUTE))
+		{
+			return GameState._sprites.get((7*12) + 1);
 		}
 		else if (type.equals(Constants.ENEMY_BOSS) && track == 0)
 		{

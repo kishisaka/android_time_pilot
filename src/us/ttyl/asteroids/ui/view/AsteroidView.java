@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import us.ttyl.asteroids.R;
+import us.ttyl.starship.core.AudioPlayer;
 import us.ttyl.starship.core.Constants;
 import us.ttyl.starship.core.GameState;
 import us.ttyl.starship.core.GameUtils;
@@ -18,6 +19,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -81,6 +84,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 				{
 					MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1);
 					GameState._weapons.set(0, player);
+					AudioPlayer.resumePlayerGun();
 				}
 				else
 				{
@@ -103,8 +107,12 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		GameState._sprites = GameUtils.getTilesFromFile(context);
 		GameState._bossSprites = GameUtils.getBossTilesFromFile(context);
 		
+		//initalize sound
+		AudioPlayer.initSound(context);
+		
 		//add player to ship list
 		MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1); 
+		player.setMissileCount(10);
 		GameState._weapons.add(player);			
 		
 		// start the game engine! 
@@ -143,6 +151,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		Paint mMissileSmoke3 = new Paint();	
 		Paint mTextColor = new Paint();
 		Paint mControllerColor = new Paint();
+		Paint mParticleExplosionBoss = new Paint();
 		
 		private static final String TAG = "AsteroidViewThread";
 		
@@ -155,6 +164,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			mGunEnemy.setColor(Color.RED);
 			mGunPlayer.setColor(Color.GREEN);
 			mParticleExplosion.setColor(0xffff0000);
+			mParticleExplosionBoss.setColor(0xffd3d3d3);
 			mMissileSmoke1.setColor(0xffffaa00);
 			mMissileSmoke2.setColor(0xffffff80);
 			mMissileSmoke3.setColor(0xffff0000);
@@ -224,7 +234,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 
 		    int spriteXSize = GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER).getWidth();
 		    int spriteYSize = GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER).getHeight();
-		    if (GameState._weapons.get(0).getDestroyedFlag() == false)
+		    if (GameState._weapons.get(0).getWeaponName().equals(Constants.PLAYER) == true && GameState._weapons.get(0).getDestroyedFlag() == false)
 		    {
 		    	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER), centerXCanvas - (spriteXSize/2), centerYCanvas - (spriteYSize/2), null);
 		    }
@@ -244,6 +254,10 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        if (me.getWeaponName().equals(Constants.ENEMY_FIGHTER))
 			        {
 			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY_FIGHTER),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
+			        }
+			        if (me.getWeaponName().equals(Constants.PARACHUTE))
+			        {
+			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.PARACHUTE),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
 			        }
 			        if (me.getWeaponName().equals(Constants.ENEMY_BOSS))
 			        {
@@ -291,6 +305,10 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			        	int x2 = x1 + misslePixel;
 			        	int y2 = y1 + misslePixel;
 			        	canvas.drawRect(x1, y1, x2, y2, smokeColor);
+			        }
+			    	else if(me.getWeaponName().equals(Constants.BOSS_SMOKE))
+			        {	
+			    		canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosionBoss);
 			        }
 		    	}	
 		    }	    
@@ -347,6 +365,9 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		mAsteroidViewThread.stopAsteroidViewThread();
 		//kill game update thread
 		GameState.mIsRunning = false;
+		
+		//no playfield, kill all audio streams, will come back when user returns. 
+		AudioPlayer.killAllAudio();
 	}
 	
 	@Override
@@ -375,9 +396,10 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			{		
 				x = x - mControllerCircleX;
 				y = y - mControllerCircleY;
-				double x1 = GameUtils.getA(0, x);
-			    double y1 = GameUtils.getB(0, y);		  
-				int track = _degrev[(int)GameUtils.track(x1, y1)];		
+				// double x1 = GameUtils.getA(0, x);
+			    // double y1 = GameUtils.getB(0, y);		  
+				// int track = _degrev[(int)GameUtils.track(x1, y1)];
+				int track = _degrev[(int)GameUtils.track(0,0,x,y)];
 				GameState._weapons.get(0).setDirection(track);	
 			}
 			if (rangeSpecialWeapon <= (30 * density))
@@ -390,12 +412,16 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 					GameState._playerEnemyShot = 0;
 					GameState._playerScore = 0;
 					MovementEngine player = new FreeEngine(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1);
+					player.setMissileCount(10);
+					
+					//resume player gun sound
+					AudioPlayer.resumePlayerGun();
 					
 					//remove all enemy guns and missiles
 					for(int i =0 ; i < GameState._weapons.size(); i ++)
 					{
 						MovementEngine enemyWeapon = GameState._weapons.get(i);
-						if (enemyWeapon.getWeaponName().equals(Constants.GUN_ENEMY) || enemyWeapon.getWeaponName().equals(Constants.MISSILE_ENEMY) )
+						if (enemyWeapon.getWeaponName().equals(Constants.GUN_ENEMY) || enemyWeapon.getWeaponName().equals(Constants.MISSILE_ENEMY) || enemyWeapon.getWeaponName().equals(Constants.ENEMY_BOSS))
 						{
 							GameState._weapons.remove(i);
 						}
@@ -407,9 +433,13 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 					//launch missiles
 					long currentTime = System.currentTimeMillis();
 					long timeDiff = currentTime - mMissileLastLaunch;
-					if (timeDiff > 250)
+					if (timeDiff > 250 && GameState._weapons.get(0).getMissileCount() > 0)
 					{
+						// subtract one from missile count
+						GameState._weapons.get(0).decrementMissileCount();
+						
 						mMissileLastLaunch = currentTime;
+						
 						// find closest target			
 						Set <Integer> missleSet = new HashSet<Integer>();
 						
@@ -443,10 +473,10 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 									, (int)GameState._weapons.get(0).getX(), (int)GameState._weapons.get(0).getY(), .01, 10, .1, 1
 									, Constants.MISSILE_PLAYER, closestTarget,  GameState._weapons.get(0), 250);  
 							GameState._weapons.add(missile);
-		//					if (GameState._muted == false)
-		//					{
-		//						GameState._audioPlayerMissile.play();
-		//					}
+							if (GameState._muted == false)
+							{
+								AudioPlayer.playMissileSound();
+							}
 						}
 					}
 				}
