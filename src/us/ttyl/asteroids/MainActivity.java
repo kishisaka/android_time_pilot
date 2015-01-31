@@ -76,8 +76,8 @@ public class MainActivity extends FragmentActivity implements SensorEventListene
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		// TODO Auto-generated method stub
-		 GameState.mPressure = event.values[0];
-		 GameState.mTemp = event.values[1];
+		 GameState.sPressure = event.values[0];
+		 GameState.sTemp = event.values[1];
 	}
 
 	@Override

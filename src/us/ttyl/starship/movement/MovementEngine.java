@@ -1,6 +1,8 @@
 package us.ttyl.starship.movement;
 
+import us.ttyl.starship.core.AudioPlayer;
 import us.ttyl.starship.core.Constants;
+import us.ttyl.starship.core.GameState;
 import android.util.Log;
 
 /**
@@ -25,6 +27,7 @@ public abstract class MovementEngine
   int _endurance;
   MovementEngine _origin;
   int _hitPoints = 1;
+  int _missileCount = -1;
 
   public abstract void updateSpeed();
   public abstract void updateSpeedIncrease();
@@ -127,13 +130,18 @@ public abstract class MovementEngine
       }
   }
 
-  public void checkDestroyed()
+  public boolean checkDestroyed()
   {
 	if (_endurance == 0 || _hitPoints == 0)
 	{
 		_endurance = 0;
 		_hitPoints = 0;
 		_destroyed = true;
+		return true;
+	}
+	else
+	{
+		return false;
 	}
   }
 
@@ -157,6 +165,11 @@ public abstract class MovementEngine
 	 _endurance = endurance;
   }
   
+  public int getHitpoints()
+  {
+	  return _hitPoints;
+  }
+  
   public void setHitPoints(int hitPoints)
   {
 	  _hitPoints = hitPoints;
@@ -165,5 +178,20 @@ public abstract class MovementEngine
   public void decrementHitPoints(int damage)
   {
 	  _hitPoints = _hitPoints - damage;	  
+  }
+  
+  public int getMissileCount()
+  {
+	  return _missileCount;
+  }
+  
+  public void decrementMissileCount()
+  {
+	  _missileCount = _missileCount - 1;	  
+  }
+  
+  public void setMissileCount(int missileCount)
+  {
+	  _missileCount = missileCount;
   }
 }
