@@ -1,11 +1,13 @@
 package us.ttyl.starship.core;
 
-import android.util.Log;
 import us.ttyl.starship.env.EnvBuilder;
 import us.ttyl.starship.listener.GameStateListener;
-import us.ttyl.starship.movement.FollowEngine;
-import us.ttyl.starship.movement.LineEngine;
 import us.ttyl.starship.movement.MovementEngine;
+import us.ttyl.starship.movement.ships.Bullet;
+import us.ttyl.starship.movement.ships.ExplosionParticle;
+import us.ttyl.starship.movement.ships.Missile;
+import us.ttyl.starship.movement.ships.Parachute;
+import android.util.Log;
 
 public class MainLoop extends Thread
 {
@@ -17,8 +19,7 @@ public class MainLoop extends Thread
 	private static final String TAG = "MainLoop";
 	
 	public MainLoop(GameStateListener gameStateListener, int density)
-	{
-		
+	{		
 		_density = density;
 		_gameStatelistener = gameStateListener;
 		// SpeedController controller = new SpeedController();
@@ -36,9 +37,9 @@ public class MainLoop extends Thread
 		long startTimeBoss = startTime;
 		
 		//start player gun sound, this will run till player dies
-		if (GameState._weapons.get(0).getWeaponName().equals(Constants.PLAYER) && GameState._weapons.get(0).getDestroyedFlag() == false)
+		if (GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) && GameState._weapons.get(0).getDestroyedFlag() == false)
 		{
-			AudioPlayer.playPlayerGun();
+			AudioPlayer.resumePlayerGun();
 		}
 		
 		//main game loop
@@ -50,15 +51,15 @@ public class MainLoop extends Thread
 		    	//generate a new ship. 	
 		    	int enemyCount = GameUtils.getTypeCount(Constants.ENEMY_FIGHTER); 
 		    	// System.out.println("enemyCount: " + enemyCount);
-				if (currentTime - startTime > 300 && enemyCount < 4)
-				{
-					startTime = currentTime;
+				if (GameState.mWaitTimeBetweenLevels == false && (currentTime - startTime) > 300 && enemyCount < 4)
+				{					
 			    	EnvBuilder.generateEnemy(GameState._weapons.get(0).getX()
-			    			, GameState._weapons.get(0).getY());			    	
+			    			, GameState._weapons.get(0).getY());		
+			    	startTime = currentTime;
 				}
 				
 				//generate a boss ship				
-				if ((currentTime - startTimeBoss) > 3000)
+				if (GameState.mWaitTimeBetweenLevels == false && (currentTime - startTimeBoss) > 6000)
 				{
 					EnvBuilder.generateEnemyBoss(GameState._weapons.get(0).getX()
 					 		, GameState._weapons.get(0).getY());
@@ -67,39 +68,39 @@ public class MainLoop extends Thread
 				
 				// fire enemy guns constantly	
 				long currentTimeEnemyGun = System.currentTimeMillis();
-				if (currentTimeEnemyGun - startTimeEnemyGun > 350 && GameState._weapons.get(0).getWeaponName().equals(Constants.PLAYER) == true)
+				if (currentTimeEnemyGun - startTimeEnemyGun > 850 && GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) == true)
 				{
 					for(int i = 0; i < GameState._weapons.size(); i ++)
 					{
-						if ((int)(Math.random() * 100) > getEnemyGunFireRate())
+						if ((int)(Math.random() * 100) > 98)
 						{
-							if (Math.random() * 100 > 50)
+							if (Math.random() * 100 > 20)
 							{
-								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY_FIGHTER))
+								if (GameState._weapons.get(i).getWeaponName()==(Constants.ENEMY_FIGHTER))
 								{
 									startTimeEnemyGun = currentTimeEnemyGun;
 									
 									// get player track
 									int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));
 																							
-									MovementEngine bullet = new LineEngine(targetTrack, targetTrack
+									MovementEngine bullet = new Bullet(targetTrack, targetTrack
 											, (int)GameState._weapons.get(i).getX() 
 											, (int)GameState._weapons.get(i).getY()
-											, 4, 4, 1, 1
-											, Constants.GUN_ENEMY, GameState._weapons.get(i), 200, 1);  
+											, 3, 3, 1, 1
+											, Constants.GUN_ENEMY, GameState._weapons.get(i), 100, 1);  
 									GameState._weapons.add(bullet);
 								}
 							}
 							else
 							{					
-								if (GameState._weapons.get(i).getWeaponName().equals(Constants.ENEMY_FIGHTER))
+								if (GameState._weapons.get(i).getWeaponName()==(Constants.ENEMY_FIGHTER))
 								{
 									startTimeEnemyGun = currentTimeEnemyGun;
 									
 									// get player track
 									int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));								
 									
-									MovementEngine missile = new FollowEngine(targetTrack, targetTrack
+									MovementEngine missile = new Missile(targetTrack, targetTrack
 											, (int)GameState._weapons.get(i).getX()
 											, (int)GameState._weapons.get(i).getY()
 											, GameState._weapons.get(i).getCurrentSpeed(), 3, 1, 1
@@ -109,7 +110,7 @@ public class MainLoop extends Thread
 									{
 										AudioPlayer.playMissileSound();
 									}
-							}
+								}	
 							}
 						}
 					}
@@ -117,13 +118,13 @@ public class MainLoop extends Thread
 				
 				// fire gun constantly
 				// System.out.println("gunModifier:" + _gunModifier);
-				if (GameState._weapons.get(0).getDestroyedFlag() == false && (GameState._weapons.get(0).getWeaponName().equals(Constants.PLAYER)))
+				if (GameState._weapons.get(0).getDestroyedFlag() == false && (GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER)))
 				{
 					long currentTimeGun = currentTime;
-					if (currentTimeGun - startTimeGun > 50)
+					if (currentTimeGun - startTimeGun > 30)
 					{
 						startTimeGun = currentTimeGun;
-						MovementEngine bullet = new LineEngine(GameState._weapons.get(0).getCurrentDirection() + _gunModifier, GameState._weapons.get(0).getCurrentDirection() + _gunModifier
+						MovementEngine bullet = new Bullet(GameState._weapons.get(0).getCurrentDirection() + _gunModifier, GameState._weapons.get(0).getCurrentDirection() + _gunModifier
 								, (int)GameState._weapons.get(0).getX()
 								, (int)GameState._weapons.get(0).getY(),8, 8, 1, 1, Constants.GUN_PLAYER, GameState._weapons.get(0), 200, 1);  
 						GameState._weapons.add(bullet);
@@ -144,26 +145,26 @@ public class MainLoop extends Thread
 				for(int i = 0; i < GameState._weapons.size(); i ++)
 		    	{		    		
 		    		MovementEngine ship = GameState._weapons.get(i);
-		    		if(ship.getWeaponName().equals(Constants.MISSILE_PLAYER) || ship.getWeaponName().equals(Constants.MISSILE_ENEMY))
+		    		if(ship.getWeaponName()==(Constants.MISSILE_PLAYER) || ship.getWeaponName()==(Constants.MISSILE_ENEMY))
 					{
 		    			// make smoke trail
-		    			MovementEngine missileSmokeTrail = new LineEngine(ship.getCurrentDirection(), ship.getCurrentDirection()
+		    			MovementEngine missileSmokeTrail = new ExplosionParticle(ship.getCurrentDirection(), ship.getCurrentDirection()
 								, (int)ship.getX()
-								, (int)ship.getY(),0, 0, 0, 0, Constants.MISSILE_SMOKE, ship, 5, 1);   		    			
+								, (int)ship.getY(),0, 0, 0, 0, Constants.MISSILE_SMOKE, null, 5, 1);   		    			
 		    			GameState._weapons.add(missileSmokeTrail);
 					}
 
 		    		// make boss damage smoke trail
-		    		if (ship.getWeaponName().equals(Constants.ENEMY_BOSS))
+		    		if (ship.getWeaponName()==(Constants.ENEMY_BOSS))
 		    		{
 			    		if (ship.getHitpoints() < 10 )
 			    		{			    		
 							int particleDirection = (int)(Math.random() * 360);
 							int particleSpeed = (int)(Math.random() * 10);
 							int particleEndurance = (int)(Math.random() * 50);
-							MovementEngine explosionParticle = new LineEngine(particleDirection, particleDirection
+							MovementEngine explosionParticle = new ExplosionParticle(particleDirection, particleDirection
 									, ship.getX(), ship.getY(), particleSpeed, 1, 1, 1, Constants.BOSS_SMOKE
-									, GameState._weapons.get(0), particleEndurance, 1); 
+									, null, particleEndurance, 1); 
 							GameState._weapons.add(explosionParticle);
 			    		}
 		    		}
@@ -179,9 +180,13 @@ public class MainLoop extends Thread
 					{
 						GameState._weapons.remove(i);
 					}		    		
-		    	}				
+		    	}												
 				
-		    	sleep(15);
+				long singleLoopTime = System.currentTimeMillis() - currentTime;
+				if (singleLoopTime < 16)
+				{
+					sleep(16 - singleLoopTime);
+				}
 			}
 			catch(InterruptedException e)
 			{
@@ -222,18 +227,58 @@ public class MainLoop extends Thread
 		return (int)rate;
 	}
 	
+	private void checkCollisions(MovementEngine currentShip)
+	{		
+		if (currentShip.getWeaponName() == Constants.PLAYER 
+				|| currentShip.getWeaponName() == Constants.ENEMY_FIGHTER
+				|| currentShip.getWeaponName() == Constants.ENEMY_BOSS	
+				|| currentShip.getWeaponName() == Constants.MISSILE_PLAYER	
+				|| currentShip.getWeaponName() == Constants.MISSILE_ENEMY
+				|| currentShip.getWeaponName() == Constants.GUN_ENEMY	
+				|| currentShip.getWeaponName() == Constants.GUN_PLAYER
+				|| currentShip.getWeaponName() == Constants.PARACHUTE
+				&& currentShip.getDestroyedFlag() == false)
+		{
+			for(int i = 0; i < GameState._weapons.size(); i ++)
+			{					
+				if (i < GameState._weapons.size())
+				{
+					MovementEngine ship = GameState._weapons.get(i);					
+					if (ship.getWeaponName() == Constants.PLAYER 
+							|| ship.getWeaponName() == Constants.ENEMY_FIGHTER
+							|| ship.getWeaponName() == Constants.ENEMY_BOSS
+							|| ship.getWeaponName() == Constants.MISSILE_PLAYER	
+							|| ship.getWeaponName() == Constants.MISSILE_ENEMY
+							|| ship.getWeaponName() == Constants.GUN_ENEMY	
+							|| ship.getWeaponName() == Constants.GUN_PLAYER
+							|| ship.getWeaponName() == Constants.PARACHUTE
+							&& ship.getDestroyedFlag() == false)
+					{
+						int diffX = Math.abs((int)(currentShip.getX() - ship.getX())); 
+						int diffY = Math.abs((int)(currentShip.getY() - ship.getY())); 
+						if (diffX <= (10 * GameState._density) && diffY <= (10 * GameState._density))
+						{							
+							currentShip.onCollision(currentShip, ship);
+							ship.onCollision(ship, currentShip);
+						}						
+					}
+				}				
+			}
+		}
+	}
+	
 	/**
 	 * check for collisions between ships, bullets, etc
 	 * @param currentShip
+	 * @deprecated
 	 */
-	private void checkCollisions(MovementEngine currentShip)
-	{			
+	private void checkCollisionsOld(MovementEngine currentShip)
+	{	
 		//ignore clouds and explosions and smoke trail
-		if (currentShip.getWeaponName().equals(Constants.EXPLOSION_PARTICLE) == false 
-				&& currentShip.getWeaponName().equals(Constants.CLOUD) == false
-				&& currentShip.getWeaponName().equals(Constants.BOSS_SMOKE) == false
-				&& currentShip.getWeaponName().equals(Constants.PARACHUTE) == false
-				&& currentShip.getWeaponName().equals(Constants.MISSILE_SMOKE) == false)
+		if (currentShip.getWeaponName()==(Constants.EXPLOSION_PARTICLE) == false 
+				&& currentShip.getWeaponName()==(Constants.CLOUD) == false
+				&& currentShip.getWeaponName()==(Constants.BOSS_SMOKE) == false	
+				&& currentShip.getWeaponName()==(Constants.MISSILE_SMOKE) == false)
 		{
 			for(int i = 0; i < GameState._weapons.size(); i ++)
 			{		
@@ -244,42 +289,41 @@ public class MainLoop extends Thread
 					if (currentShip.getOrigin() != null)
 					{							
 						// ignore cloud, explosions and own ship and smoke trail
-						if (ship.getWeaponName().equals(Constants.EXPLOSION_PARTICLE) == false 
-								&& ship.getWeaponName().equals(Constants.CLOUD) == false
-								&& ship.getWeaponName().equals(Constants.MISSILE_PLAYER) == false
-								&& ship.getWeaponName().equals(Constants.GUN_PLAYER) == false							
-								&& ship.getWeaponName().equals(Constants.MISSILE_SMOKE) == false
-								&& ship.getWeaponName().equals(Constants.PARACHUTE) == false
-								&& ship.getWeaponName().equals(Constants.BOSS_SMOKE) == false)
+						if (ship.getWeaponName() != (Constants.EXPLOSION_PARTICLE) 
+								&& ship.getWeaponName() != (Constants.CLOUD)
+								&& ship.getWeaponName() != (Constants.MISSILE_PLAYER)
+								&& ship.getWeaponName() != (Constants.GUN_PLAYER)	
+								&& ship.getWeaponName() != (Constants.MISSILE_SMOKE)
+								&& ship.getWeaponName() != (Constants.BOSS_SMOKE)
+								&& currentShip.getWeaponName() != Constants.PARACHUTE)
 						{
-							if (currentShip.getOrigin().getWeaponName().equals(ship.getWeaponName()) == false 
-									&& currentShip.getWeaponName().equals(ship.getWeaponName()) == false
-									&& currentShip.getWeaponName().indexOf(ship.getWeaponName()) == -1)									
-							{						
+							if (currentShip.getOrigin().getWeaponName() != (ship.getWeaponName()) 
+									&& currentShip.getWeaponName() != ship.getWeaponName())									
+							{										
 								int diffX = Math.abs((int)(currentShip.getX() - ship.getX())); 
 								int diffY = Math.abs((int)(currentShip.getY() - ship.getY())); 
 								if (diffX <= (10 * GameState._density) && diffY <= (10 * GameState._density))
 								{
-									if (ship.getWeaponName().equals(Constants.ENEMY_FIGHTER)
-											|| ship.getWeaponName().equals(Constants.ENEMY_BOSS)
-											|| ship.getWeaponName().equals(Constants.PLAYER) 
-											|| currentShip.getWeaponName().equals(Constants.PLAYER))
+									
+									if (ship.getWeaponName() == (Constants.ENEMY_FIGHTER)
+											|| ship.getWeaponName() == (Constants.ENEMY_BOSS)
+											|| ship.getWeaponName() == (Constants.PLAYER) 
+											|| currentShip.getWeaponName() == (Constants.PLAYER))
 									{									
-										if ((currentShip.getWeaponName().equals(Constants.PLAYER) 
-												|| ship.getWeaponName().equals(Constants.PLAYER)) 
+										if ((currentShip.getWeaponName() == (Constants.PLAYER) 
+												|| ship.getWeaponName() == (Constants.PLAYER)) 
 												&& GameState._weapons.get(0).getDestroyedFlag() == false)
 										{
 											GameState._weapons.get(0).set_desiredSpeed(0);
-											// System.out.println("ship blew up" + ship.getWeaponName());
 											
 											//pause the player gun sound
 											try
 											{
-												GameState.sSoundPool.pause(GameState.sPlayerGunSoundId);
+												AudioPlayer.pausePlayerGun();
 											}
 											catch(Exception e)
 											{
-												Log.e(TAG, "MainLoop.checkCollison() excepton here.", e); 
+												Log.e(TAG, "MainLoop.checkCollison() most likely sound does not exist", e); 
 											}
 											
 											Thread deadWait = new Thread(new Runnable()
@@ -300,8 +344,6 @@ public class MainLoop extends Thread
 												}
 											});
 											deadWait.start();
-											// pause player gun audio since player is dead. 
-											AudioPlayer.pausePlayerGun();
 										}
 										
 										GameState._playerScore = GameState._playerScore + 2;
@@ -313,7 +355,7 @@ public class MainLoop extends Thread
 											int particleDirection = (int)(Math.random() * 360);
 											int particleSpeed = (int)(Math.random() * 10);
 											int particleEndurance = (int)(Math.random() * 50);
-											MovementEngine explosionParticle = new LineEngine(particleDirection, particleDirection
+											MovementEngine explosionParticle = new ExplosionParticle(particleDirection, particleDirection
 													, ship.getX(), ship.getY(), particleSpeed, 1, 1, 1, Constants.EXPLOSION_PARTICLE
 													, GameState._weapons.get(0), particleEndurance, 1); 
 											GameState._weapons.add(explosionParticle);
@@ -325,9 +367,9 @@ public class MainLoop extends Thread
 										if (currentShip.checkDestroyed() == true)
 										{
 											//play death sound
-											if (GameState._muted == false && (currentShip.getWeaponName().equals(Constants.ENEMY_BOSS) 
-													|| currentShip.getWeaponName().equals(Constants.ENEMY_FIGHTER) 
-													|| currentShip.getWeaponName().equals(Constants.PLAYER)) )
+											if (GameState._muted == false && (currentShip.getWeaponName()==(Constants.ENEMY_BOSS) 
+													|| currentShip.getWeaponName()==(Constants.ENEMY_FIGHTER) 
+													|| currentShip.getWeaponName()==(Constants.PLAYER)) )
 											{
 												playDeathSound = true;
 											}	
@@ -336,18 +378,18 @@ public class MainLoop extends Thread
 										if (ship.checkDestroyed())
 										{
 											//play death sound
-											if (GameState._muted == false && (ship.getWeaponName().equals(Constants.ENEMY_BOSS) 
-													|| ship.getWeaponName().equals(Constants.ENEMY_FIGHTER) 
-													|| ship.getWeaponName().equals(Constants.PLAYER)) )
+											if (GameState._muted == false && (ship.getWeaponName()==(Constants.ENEMY_BOSS) 
+													|| ship.getWeaponName()==(Constants.ENEMY_FIGHTER) 
+													|| ship.getWeaponName()==(Constants.PLAYER)) )
 											{
 												playDeathSound = true;
 												
 												//if boss and destroyed, release parachute
-												if (ship.getWeaponName().equals(Constants.ENEMY_BOSS))
+												if (ship.getWeaponName()==(Constants.ENEMY_BOSS))
 												{
-													MovementEngine parachute = new LineEngine(270, 270
+													MovementEngine parachute = new Parachute(270, 270
 															, ship.getX(), ship.getY(), .2, 1, 1, 1, Constants.PARACHUTE
-															, GameState._weapons.get(0), 400, 1); 
+															,null, 400, 1); 
 													GameState._weapons.add(parachute);
 												}
 											}	
@@ -357,9 +399,30 @@ public class MainLoop extends Thread
 											AudioPlayer.playShipDeath();
 										}																				
 									}
+									else if (currentShip.getWeaponName() == Constants.PARACHUTE && ship.getWeaponName() == Constants.PLAYER)
+									{
+										currentShip.setDestroyedFlag(true);
+									}
+									else if (ship.getWeaponName() == Constants.PARACHUTE && currentShip.getWeaponName() == Constants.PLAYER)
+									{
+										
+									}
 										
 									// System.out.println(ship.getWeaponName() + " is destroyed.");
 									break;
+								}
+							}
+							else if ((ship.getWeaponName() == Constants.PARACHUTE && currentShip.getWeaponName() == Constants.PLAYER) || (ship.getWeaponName() == Constants.PLAYER && currentShip.getWeaponName() == Constants.PARACHUTE))
+							{
+								if (ship.getWeaponName() == Constants.PARACHUTE)
+								{
+									ship.setDestroyedFlag(true);
+									currentShip.incrementMissileCount(10);
+								}
+								if (currentShip.getWeaponName() == Constants.PARACHUTE)
+								{
+									currentShip.setDestroyedFlag(true);
+									ship.incrementMissileCount(10);
 								}
 							}
 						}

@@ -12,7 +12,7 @@ public class FollowEngine extends MovementEngine
 {
 	MovementEngine _target = null;
   
-	public FollowEngine(
+	protected FollowEngine(
 		  int direction, 
 		  int currentDirection, 
 		  double currentX, 
@@ -21,7 +21,7 @@ public class FollowEngine extends MovementEngine
 		  double maxSpeed, 
 		  double acceleration, 
 		  int turnMode, 
-		  String name, 
+		  int name, 
 		  MovementEngine target, 
 		  MovementEngine origin, 
 		  int endurance)
@@ -69,9 +69,7 @@ public class FollowEngine extends MovementEngine
   public void updateDirection()
   {
     //get direction
-    double a = GameUtils.getA(_currentX, _target.getX());
-    double b = GameUtils.getB(_currentY, _target.getY());
-    _direction = ((int)GameUtils.track(a, b));
+    _direction = ((int)GameUtils.track(_currentX, _currentY, _target.getX(), _target.getY()));
 
     //update direction as per movement rules
     int leftCount = 0;

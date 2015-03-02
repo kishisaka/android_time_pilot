@@ -9,7 +9,7 @@ import us.ttyl.starship.core.GameState;
  */
 public class LineEngine extends MovementEngine
 {
-	public LineEngine(
+	protected LineEngine(
 	  	int direction, 
 	  	int currentDirection, 
 	  	double currentX, 
@@ -18,7 +18,7 @@ public class LineEngine extends MovementEngine
 	  	double maxSpeed, 
 	  	double acceleration, 
 	  	int turnMode, 
-	  	String name,
+	  	int name,
 	  	MovementEngine origin, 
 	  	int endurance,
 	  	int hitpoints)

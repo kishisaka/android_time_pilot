@@ -10,6 +10,7 @@ public class AudioPlayer
 	public static int sPlayerGunSoundId;
 	public static int sMissileSoundId;
 	public static int sShipDeathSoundId;
+	public static int sParachutePickup;
 	
 	public static SoundPool sSoundPool;
 	
@@ -22,7 +23,10 @@ public class AudioPlayer
 		sSoundPool = new SoundPool(200, AudioManager.STREAM_MUSIC, 0);
 		sPlayerGunSoundId = sSoundPool.load(context, R.raw.gun3, 1);
 		sShipDeathSoundId = sSoundPool.load(context, R.raw.enemy_death, 1);
-		sMissileSoundId = sSoundPool.load(context, R.raw.missile_launch2, 1);}
+		sMissileSoundId = sSoundPool.load(context, R.raw.missile_launch2, 1);
+		sParachutePickup = sSoundPool.load(context, R.raw.parachute_pickup, 1);
+		playPlayerGun();
+	}
 	
 	/**
 	 * play the ship death sound
@@ -70,6 +74,14 @@ public class AudioPlayer
 	public static void killAllAudio()
 	{		
 		sSoundPool.stop(sPlayerGunSoundId);
+	}
+	
+	/**
+	 * play parachute pickup sounds
+	 */
+	public static void playParachutePickup()
+	{
+		sSoundPool.play(sParachutePickup, .5f, .5f, 0, 0, 1.0f);
 	}
 
 }

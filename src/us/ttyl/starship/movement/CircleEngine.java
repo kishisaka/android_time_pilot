@@ -1,5 +1,6 @@
 package us.ttyl.starship.movement;
 
+import android.util.Log;
 import us.ttyl.starship.core.GameState;
 
 /**
@@ -9,7 +10,7 @@ import us.ttyl.starship.core.GameState;
  */
 public class CircleEngine extends MovementEngine
 {
-   public CircleEngine(
+   protected CircleEngine(
    	int direction, 
    	int currentDirection, 
    	double currentX, 
@@ -18,7 +19,7 @@ public class CircleEngine extends MovementEngine
    	double maxSpeed, 
    	double acceleration, 
    	double turnMode,
-	String name, 
+	int name, 
 	int endurance)
    {
     _name = name;
@@ -98,6 +99,7 @@ public class CircleEngine extends MovementEngine
 	@Override
 	public void onCollision(MovementEngine engine1, MovementEngine engine2)
 	{
+		Log.i("kurt_test", "CircleEngine.onCollision()");
 	}
 
 }

@@ -4,6 +4,7 @@
  */
 package us.ttyl.starship.movement;
 
+import android.util.Log;
 import us.ttyl.starship.core.GameState;
 
 /**
@@ -13,7 +14,7 @@ import us.ttyl.starship.core.GameState;
  */
 public class FreeEngine extends MovementEngine
 {
-	public FreeEngine(
+	protected FreeEngine(
 		  int direction
 		  , int currentDirection
 		  , double currentX
@@ -23,7 +24,7 @@ public class FreeEngine extends MovementEngine
 		  , double maxSpeed
 		  , double acceleration
 		  , int turnMode
-		  , String name
+		  , int name
 		  , int endurance
 		  )
 	{
@@ -106,7 +107,7 @@ public class FreeEngine extends MovementEngine
 	@Override
 	public void onCollision(MovementEngine engine1, MovementEngine engine2) {
 		// TODO Auto-generated method stub
-		
+		Log.i("kurt_test", "FreeEngine.onCollision()");		
 	}
 
 	

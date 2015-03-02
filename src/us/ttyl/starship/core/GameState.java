@@ -11,10 +11,12 @@ public class GameState
 {
 	public static boolean mIsRunning = false; 
 	public static boolean mIsThrottlePressed = false;
+	public static boolean mWaitTimeBetweenLevels = false;
 	
 	// guns, missiles, player ship, enemy ships
 	public static Vector <MovementEngine>_weapons = new Vector<MovementEngine>();
 	
+	//sprites
 	public static ArrayList <Bitmap> _sprites;
 	public static ArrayList <Bitmap> _bossSprites;
 	
@@ -39,5 +41,9 @@ public class GameState
 	//sounds
 	public static SoundPool sSoundPool;
 	public static int sPlayerGunSoundId;
+	
+	//game level indicator
+	public static int sParachutePickupCount = 0;
+	public static int sCurrentLevel = 1;
 }
 

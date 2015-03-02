@@ -1,10 +1,5 @@
 package us.ttyl.starship.movement;
 
-import us.ttyl.starship.core.AudioPlayer;
-import us.ttyl.starship.core.Constants;
-import us.ttyl.starship.core.GameState;
-import android.util.Log;
-
 /**
  * all engines extend this and override the movement methods. 
  * @author kurt ishisaka
@@ -23,7 +18,7 @@ public abstract class MovementEngine
   double _currentSpeed;
   double _acceleration;
   double _desiredSpeed;
-  String _name;
+  int _name;
   int _endurance;
   MovementEngine _origin;
   int _hitPoints = 1;
@@ -93,12 +88,12 @@ public abstract class MovementEngine
     return _currentSpeed;
   }
 
-  public String getWeaponName()
+  public int getWeaponName()
   {
     return _name;
   }
 
-  public void setWeaponName(String name)
+  public void setWeaponName(int name)
   {
     _name = name;
   }
@@ -188,6 +183,11 @@ public abstract class MovementEngine
   public void decrementMissileCount()
   {
 	  _missileCount = _missileCount - 1;	  
+  }
+  
+  public void incrementMissileCount(int count)
+  {
+	  _missileCount = _missileCount + count; 
   }
   
   public void setMissileCount(int missileCount)

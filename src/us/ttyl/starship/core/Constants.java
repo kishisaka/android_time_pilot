@@ -1,17 +1,17 @@
 package us.ttyl.starship.core;
 
 public class Constants {
-	public static final String EXPLOSION_PARTICLE = "explosion_particle";	
-	public static final String CLOUD = "cloud";
-	public static final String PARACHUTE = "parachute";
-	public static final String MISSILE_SMOKE = "missile_smoke";
-	public static final String BOSS_SMOKE = "boss_smoke";
-	public static final String MISSILE_PLAYER = "missile_player";
-	public static final String MISSILE_ENEMY = "missile_enemy";
-	public static final String GUN_PLAYER = "gun_player";
-	public static final String ENEMY_FIGHTER = "eneny_fighter";
-	public static final String ENEMY_BOSS = "eneny_boss";
-	public static final String PLAYER = "player";
-	public static final String GUN_ENEMY = "gun_enemy";
-	public static final String MISSILE = "missile";
+	public static final int EXPLOSION_PARTICLE = 1;	
+	public static final int CLOUD = 2;
+	public static final int PARACHUTE = 3;
+	public static final int MISSILE_SMOKE = 4;
+	public static final int BOSS_SMOKE = 5;
+	public static final int MISSILE_PLAYER = 6;
+	public static final int MISSILE_ENEMY = 7;
+	public static final int GUN_PLAYER = 8;
+	public static final int ENEMY_FIGHTER = 9;
+	public static final int ENEMY_BOSS = 10;
+	public static final int PLAYER = 11;
+	public static final int GUN_ENEMY = 12;
+	public static final int MISSILE = 13;
 }

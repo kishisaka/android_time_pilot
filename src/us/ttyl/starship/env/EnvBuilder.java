@@ -6,6 +6,9 @@ import us.ttyl.starship.core.GameUtils;
 import us.ttyl.starship.movement.CircleEngine;
 import us.ttyl.starship.movement.LineEngine;
 import us.ttyl.starship.movement.MovementEngine;
+import us.ttyl.starship.movement.ships.Cloud;
+import us.ttyl.starship.movement.ships.EnemyBoss;
+import us.ttyl.starship.movement.ships.EnemyFighter;
 
 public class EnvBuilder 
 {
@@ -25,7 +28,7 @@ public class EnvBuilder
 						int endurance)
 					   {
 		*/
-		MovementEngine circleEngine = new CircleEngine(0, 0, planetX, planetY, 1
+		MovementEngine circleEngine = new EnemyFighter(0, 0, planetX, planetY, 1
 				, 1, 1, turnmode, (Constants.ENEMY_FIGHTER),-1);
 		GameState._weapons.add(circleEngine);		
 	}
@@ -57,7 +60,7 @@ public class EnvBuilder
 		boolean found = false;
 		for(MovementEngine engine:GameState._weapons)
 		{
-			if (engine.getWeaponName().equals(Constants.ENEMY_BOSS))
+			if (engine.getWeaponName() == Constants.ENEMY_BOSS)
 			{
 				found = true;
 				break;
@@ -65,7 +68,7 @@ public class EnvBuilder
 		}
 		if (found == false)
 		{
-			GameState._weapons.add(new LineEngine(direction, direction, playerPositionX + xOffset
+			GameState._weapons.add(new EnemyBoss(direction, direction, playerPositionX + xOffset
 					, playerPositionY, speed
 					, speed, speed, turnmode, Constants.ENEMY_BOSS, null, -1, 25));	
 		}
@@ -108,7 +111,7 @@ public class EnvBuilder
 		{
 			direction = 180;
 		}
-		GameState._weapons.add(new LineEngine(direction, direction, coord[0] + playerPositionX
+		GameState._weapons.add(new Cloud(direction, direction, coord[0] + playerPositionX
 				, coord[1]+playerPositionY, 1d
 				, .1d, .1d, 0, Constants.CLOUD, null, -1, 1));	
 	}

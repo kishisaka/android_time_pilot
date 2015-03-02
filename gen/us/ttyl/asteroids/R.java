@@ -1211,8 +1211,9 @@ containing a value of this type.
         public static final int gun3=0x7f050004;
         public static final int missile_launch=0x7f050005;
         public static final int missile_launch2=0x7f050006;
-        public static final int trek1=0x7f050007;
-        public static final int trek2=0x7f050008;
+        public static final int parachute_pickup=0x7f050007;
+        public static final int trek1=0x7f050008;
+        public static final int trek2=0x7f050009;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
