@@ -24,13 +24,41 @@ public abstract class MovementEngine
   int _hitPoints = 1;
   int _missileCount = -1;
 
+  // these methods are called once a turn in the MainLoop which runs at a rate of 
+  // 60 times a second if possible (16 ms per turn). 
+  
+  /**
+   * update the speed of the weapon
+   */
   public abstract void updateSpeed();
+  /**
+   * increase the speed of the weapon
+   */
   public abstract void updateSpeedIncrease();
+  /**
+   * decrease the speed of the weapon
+   */
   public abstract void updateSpeedDecrease();
+  /**
+   * change the direction of the weapon
+   */
   public abstract void updateDirection();
+  /**
+   * change the location of the weapon
+   */
   public abstract void updateDisplacement();
+  /**
+   * update the endurance of the weapon (generally reduce its fuel suppy here)
+   */
   public abstract void updateFuelUsage();
+  /**
+   * do misc extra stuff here for the weapon if required
+   */
   public abstract void doOther();
+  /**
+   * a collision was detected so handle it here (reduce hit points, destroy weapon, etc.) 
+   * @param engine2 (some other engine that collided with this)
+   */
   public abstract void onCollision(MovementEngine engine2);
   
   public double getAcceleration()
@@ -108,6 +136,9 @@ public abstract class MovementEngine
     return _currentY;
   }
 
+  /**
+   * MainLoop runs this method to update the weapon's state
+   */
   public void run()
   {
 	  try

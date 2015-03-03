@@ -1,11 +1,10 @@
 package us.ttyl.starship.movement;
 
-import android.util.Log;
 import us.ttyl.starship.core.GameState;
 
 /**
- * planets and base stations
- * @author test
+ * planets and base stations, enemy fighters use this
+ * @author kurt ishisaka
  *
  */
 public class CircleEngine extends MovementEngine

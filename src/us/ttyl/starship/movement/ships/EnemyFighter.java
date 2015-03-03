@@ -30,6 +30,7 @@ public class EnemyFighter extends CircleEngine
 				// remove enemy fighter from list
 				decrementHitPoints(1);
 				checkDestroyed();
+				GameState._playerScore = GameState._playerScore + 200;
 				
 				// play death sound
 				AudioPlayer.playShipDeath();	

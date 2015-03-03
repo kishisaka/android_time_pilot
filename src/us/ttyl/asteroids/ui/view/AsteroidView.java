@@ -26,6 +26,13 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ * custom view to render the player view. Uses data in GameState holder which is updated
+ * by the MainLoop. 
+ * 
+ * @author kurt ishisaka
+ *
+ */
 public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback 
 {
 	AsteroidViewThread mAsteroidViewThread = null;
@@ -113,7 +120,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		
 		// start the game engine! 
 		int density = (int)getContext().getResources().getDisplayMetrics().density;
-		new MainLoop(mGameStateListener, density);
+		new MainLoop(density);
 		
 		//initialize deg map (reversed)
 		_degrev = new int[360];
@@ -157,7 +164,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			mSurfaceHolder = holder;
 			
 			//setup the color for all ships
-			mGunEnemy.setColor(Color.RED);
+			mGunEnemy.setColor(Color.BLUE);
 			mGunPlayer.setColor(Color.GREEN);
 			mParticleExplosion.setColor(0xffff0000);
 			mParticleExplosionBoss.setColor(0xffd3d3d3);
@@ -369,117 +376,139 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		AudioPlayer.killAllAudio();
 	}
 	
+	/**
+	 * return the closest target that is not currently tracked by other missiles. 
+	 * @return
+	 */
+	public MovementEngine findClosestTarget()	
+	{
+		Set <MovementEngine> alreadyTrackedTargets = new HashSet <MovementEngine> ();
+		
+		//get all targets that are currently being tracked by missiles
+		for(int i = 0; i < GameState._weapons.size(); i ++)
+		{
+			MovementEngine weapon = GameState._weapons.get(i);
+			if (weapon.getWeaponName() == Constants.MISSILE_PLAYER)
+			{
+				alreadyTrackedTargets.add(((Missile)weapon).getTarget());
+			}
+		}
+		
+		int current = Integer.MAX_VALUE;
+		MovementEngine closestEngine = null;
+		
+		// get the closest non tracked target
+		for(int i = 0; i < GameState._weapons.size(); i ++)
+		{
+			MovementEngine weapon = GameState._weapons.get(i);
+			if (weapon != null && alreadyTrackedTargets.contains(weapon) == false)
+			{
+				if (weapon.getWeaponName() == Constants.ENEMY_FIGHTER
+						|| weapon.getWeaponName() == Constants.GUN_ENEMY
+						|| weapon.getWeaponName() == Constants.MISSILE_ENEMY)
+				{
+					int range = GameUtils.getRange(GameState._weapons.get(0), weapon);
+					if (range < current)
+					{
+						current = range;
+						closestEngine = weapon;
+					}
+				}
+			}			
+		}
+		return closestEngine;
+	}
+	
 	@Override
     public boolean onTouchEvent(MotionEvent motionEvent)
     {
 		int count = motionEvent.getPointerCount();
 		
 		// get the direction and special weapon motion events if exists. 
-		for(int countIndex = 0; countIndex < count; countIndex ++)
+		if (GameState._weapons.get(0).getDestroyedFlag() == false)
 		{
-			int x = 0;
-			int y = 0;
-			
-			int density = (int)getContext().getResources().getDisplayMetrics().density;
-			
-			x = (int)MotionEventCompat.getX(motionEvent, countIndex);
-			y = (int)MotionEventCompat.getY(motionEvent, countIndex);
-			
-			double rangeController = GameUtils.getRangeBetweenCoords(mControllerCircleX, mControllerCircleY, x, y);
-			double rangeSpecialWeapon = GameUtils.getRangeBetweenCoords(mSpecialWeaponX, mSpecialWeaponY, x, y);
-			
-			// Log.i("kurt_test", "rangeController: " + rangeController + " | rangeSpecialWeapon: " + rangeSpecialWeapon);
-					
-			// process the events! 
-			if (rangeController <= (100 * density))
-			{		
-				x = x - mControllerCircleX;
-				y = y - mControllerCircleY;
-				// double x1 = GameUtils.getA(0, x);
-			    // double y1 = GameUtils.getB(0, y);		  
-				// int track = _degrev[(int)GameUtils.track(x1, y1)];
-				int track = _degrev[(int)GameUtils.track(0,0,x,y)];
-				GameState._weapons.get(0).setDirection(track);	
-			}
-			if (rangeSpecialWeapon <= (30 * density))
+			for(int countIndex = 0; countIndex < count; countIndex ++)
 			{
-				if ((GameState._weapons.get(0).getWeaponName()!=(Constants.PLAYER)))
-				{
-					//restart game
-					GameState._lives = 2;
-					GameState._playerBulletsShot = 0;
-					GameState._playerEnemyShot = 0;
-					GameState._playerScore = 0;
-					MovementEngine player = new PlayerFighter(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1, mGameStateListener);
-					player.setMissileCount(Constants.START_MISSILE_COUNT);
-					
-					//resume player gun sound
-					AudioPlayer.resumePlayerGun();
-					
-					//remove all enemy guns and missiles
-					for(int i =0 ; i < GameState._weapons.size(); i ++)
-					{
-						MovementEngine enemyWeapon = GameState._weapons.get(i);
-						if (enemyWeapon.getWeaponName()==(Constants.GUN_ENEMY) || enemyWeapon.getWeaponName()==(Constants.MISSILE_ENEMY) || enemyWeapon.getWeaponName()==(Constants.ENEMY_BOSS))
-						{
-							GameState._weapons.remove(i);
-						}
-					}
-					GameState._weapons.set(0, player);	
+				int x = 0;
+				int y = 0;
+				
+				int density = (int)getContext().getResources().getDisplayMetrics().density;
+				
+				x = (int)MotionEventCompat.getX(motionEvent, countIndex);
+				y = (int)MotionEventCompat.getY(motionEvent, countIndex);
+				
+				double rangeController = GameUtils.getRangeBetweenCoords(mControllerCircleX, mControllerCircleY, x, y);
+				double rangeSpecialWeapon = GameUtils.getRangeBetweenCoords(mSpecialWeaponX, mSpecialWeaponY, x, y);
+						
+				// process the events! 
+				if (rangeController <= (100 * density))
+				{		
+					x = x - mControllerCircleX;
+					y = y - mControllerCircleY;
+					int track = _degrev[(int)GameUtils.track(0,0,x,y)];
+					GameState._weapons.get(0).setDirection(track);	
 				}
-				else
+				if (rangeSpecialWeapon <= (30 * density))
 				{
-					//launch missiles
-					long currentTime = System.currentTimeMillis();
-					long timeDiff = currentTime - mMissileLastLaunch;
-					if (timeDiff > 250 && GameState._weapons.get(0).getMissileCount() > 0)
+					if ((GameState._weapons.get(0).getWeaponName()!=(Constants.PLAYER)))
 					{
-						// subtract one from missile count
-						GameState._weapons.get(0).decrementMissileCount();
+						//restart game
+						GameState._lives = 2;
+						GameState._playerBulletsShot = 0;
+						GameState._playerEnemyShot = 0;
+						GameState._playerScore = 0;
+						MovementEngine player = new PlayerFighter(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1, mGameStateListener);
+						player.setMissileCount(Constants.START_MISSILE_COUNT);
 						
-						mMissileLastLaunch = currentTime;
+						//resume player gun sound
+						AudioPlayer.resumePlayerGun();
 						
-						// find closest target			
-						Set <Integer> missleSet = new HashSet<Integer>();
-						
-						MovementEngine closestTarget = null;
-						int closestTargetRange = Integer.MAX_VALUE;
-						
-						// select a target from weapon list
-						for(int i = 1; i < GameState._weapons.size(); i ++)
+						//remove all enemy guns and missiles
+						for(int i =0 ; i < GameState._weapons.size(); i ++)
 						{
-							MovementEngine currentShip = GameState._weapons.get(i);
-							if (currentShip.getWeaponName()==(Constants.ENEMY_FIGHTER) && missleSet.contains(currentShip.hashCode()) == false)
+							MovementEngine enemyWeapon = GameState._weapons.get(i);
+							if (enemyWeapon.getWeaponName()==(Constants.GUN_ENEMY) || enemyWeapon.getWeaponName()==(Constants.MISSILE_ENEMY) || enemyWeapon.getWeaponName()==(Constants.ENEMY_BOSS))
 							{
-								int currentRange = GameUtils.getRange(GameState._weapons.get(0), currentShip);
-								//System.out.println("currentRange: "+ currentRange);
-								if (currentRange < closestTargetRange)
-								{
-									closestTarget = currentShip;
-									closestTargetRange = currentRange;
-									missleSet.add(closestTarget.hashCode());
-								}
-							}				
+								GameState._weapons.remove(i);
+							}
 						}
-						
-						int targetTrack = (int)(GameUtils.getTargetTrack(GameState._weapons.get(0), closestTarget));
-						
-						// once the closest target is selected, launch the missile. 
-						if (closestTarget != null && targetTrack != -1)
-						{					
-							MovementEngine missile = new Missile(targetTrack
-									, targetTrack
-									, (int)GameState._weapons.get(0).getX(), (int)GameState._weapons.get(0).getY(), .01, 10, .1, 1
-									, Constants.MISSILE_PLAYER, closestTarget,  GameState._weapons.get(0), 250);  
-							GameState._weapons.add(missile);
+						GameState._weapons.set(0, player);	
+					}
+					else
+					{
+						//launch missiles
+						long currentTime = System.currentTimeMillis();
+						long timeDiff = currentTime - mMissileLastLaunch;
+						if (timeDiff > 250 && GameState._weapons.get(0).getMissileCount() > 0)
+						{
+							// subtract one from missile count
+							GameState._weapons.get(0).decrementMissileCount();
+							
+							mMissileLastLaunch = currentTime;
+							for (int z = 0; z < 2; z ++)
+							{
+								// find closest target			
+								MovementEngine closestTarget = findClosestTarget();
+								int targetTrack = (int)(GameUtils.getTargetTrack(GameState._weapons.get(0), closestTarget));
+								
+								// once the closest target is selected, launch the missile. 
+								if (closestTarget != null && targetTrack != -1)
+								{					
+									MovementEngine missile = new Missile(targetTrack
+											, targetTrack
+											, (int)GameState._weapons.get(0).getX(), (int)GameState._weapons.get(0).getY(), .01, 10, .1, 1
+											, Constants.MISSILE_PLAYER, closestTarget,  GameState._weapons.get(0), 250);  
+									GameState._weapons.add(missile);
+								}
+							}
 							if (GameState._muted == false)
 							{
 								AudioPlayer.playMissileSound();
 							}
-						}
+						}					
 					}
-				}
-			}	
+				}	
+			}
 		}
     	return true;
     }
