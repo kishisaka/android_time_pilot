@@ -32,7 +32,8 @@ public class Parachute extends LineEngine
 		{
 			engine2.setMissileCount(engine2.getMissileCount() + 10);
 			decrementHitPoints(1);
-			checkDestroyed();			
+			checkDestroyed();
+			GameState._playerScore = GameState._playerScore + 1000;
 			
 			GameState.sParachutePickupCount = GameState.sParachutePickupCount + 1;
 			
@@ -40,6 +41,7 @@ public class Parachute extends LineEngine
 			if (GameState.sParachutePickupCount > 3)
 			{
 				AudioPlayer.playLevelChange();
+				GameState._playerScore = GameState._playerScore + 10000;
 				Thread levelWait = new Thread(new Runnable()
 				{
 					@Override

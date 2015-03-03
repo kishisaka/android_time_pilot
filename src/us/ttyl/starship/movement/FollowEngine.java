@@ -160,5 +160,10 @@ public class FollowEngine extends MovementEngine
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public MovementEngine getTarget()
+	{
+		return _target;
+	}
 
 }

@@ -3,13 +3,17 @@ package us.ttyl.starship.env;
 import us.ttyl.starship.core.Constants;
 import us.ttyl.starship.core.GameState;
 import us.ttyl.starship.core.GameUtils;
-import us.ttyl.starship.movement.CircleEngine;
-import us.ttyl.starship.movement.LineEngine;
 import us.ttyl.starship.movement.MovementEngine;
 import us.ttyl.starship.movement.ships.Cloud;
 import us.ttyl.starship.movement.ships.EnemyBoss;
 import us.ttyl.starship.movement.ships.EnemyFighter;
 
+/**
+ * weapon builder
+ * TODO fix to use this fully. 
+ * @author kurt ishisaka
+ *
+ */
 public class EnvBuilder 
 {
 	private static void generateShip(double planetX, double planetY, int turnmode, int speed)

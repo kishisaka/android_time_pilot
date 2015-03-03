@@ -1,10 +1,6 @@
-/*
- * @author: Kurt Ishisaka 
- * Copyright 2003 www.ttyl.us
- */
+
 package us.ttyl.starship.movement;
 
-import android.util.Log;
 import us.ttyl.starship.core.GameState;
 
 /**

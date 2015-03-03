@@ -29,8 +29,9 @@ public class EnemyBoss extends LineEngine
 				// show explosion
 				// remove enemy boss from list
 				decrementHitPoints(1);
+				GameState._playerScore = GameState._playerScore + 221;
 				if (checkDestroyed())
-				{
+				{										
 					// play death sound
 					AudioPlayer.playShipDeath();
 					
