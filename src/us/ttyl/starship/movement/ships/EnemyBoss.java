@@ -1,6 +1,5 @@
 package us.ttyl.starship.movement.ships;
 
-import android.util.Log;
 import us.ttyl.starship.core.AudioPlayer;
 import us.ttyl.starship.core.Constants;
 import us.ttyl.starship.core.GameState;
@@ -19,26 +18,25 @@ public class EnemyBoss extends LineEngine
 	}
 	
 	@Override
-	public void onCollision(MovementEngine engine1, MovementEngine engine2)
+	public void onCollision(MovementEngine engine2)
 	{
-		if (engine1.getWeaponName() != engine2.getWeaponName())
+		if (getWeaponName() != engine2.getWeaponName())
 		{
-			Log.i("kurt_test", "EnemyBoss.onCollision() " + engine1.getWeaponName() + ":" + engine2.getWeaponName());
 			//on collision with player, player missile or player gun, kill boss, show explosion 
 			if (engine2.getWeaponName() == Constants.PLAYER || engine2.getWeaponName() == Constants.MISSILE_PLAYER
 					|| engine2.getWeaponName() == Constants.GUN_PLAYER)
 			{
 				// show explosion
 				// remove enemy boss from list
-				engine1.decrementHitPoints(1);
-				if (engine1.checkDestroyed())
+				decrementHitPoints(1);
+				if (checkDestroyed())
 				{
 					// play death sound
 					AudioPlayer.playShipDeath();
 					
 					MovementEngine parachute = new Parachute(270, 270
-							, engine1.getX(), engine1.getY(), .2, 1, 1, 1, Constants.PARACHUTE
-							, GameState._weapons.get(0), 400, 1); 
+							, getX(), getY(), .2, 1, 1, 1, Constants.PARACHUTE
+							, null, -1, 1); 
 					GameState._weapons.add(parachute);
 				}	
 				// create particle explosion for shot down boss
@@ -48,7 +46,7 @@ public class EnemyBoss extends LineEngine
 					int particleSpeed = (int)(Math.random() * 10);
 					int particleEndurance = (int)(Math.random() * 50);
 					MovementEngine explosionParticle = new ExplosionParticle(particleDirection, particleDirection
-							, engine1.getX(), engine1.getY(), particleSpeed, 1, 1, 1, Constants.EXPLOSION_PARTICLE
+							, getX(), getY(), particleSpeed, 1, 1, 1, Constants.EXPLOSION_PARTICLE
 							, null, particleEndurance, 1); 
 					GameState._weapons.add(explosionParticle);
 				}

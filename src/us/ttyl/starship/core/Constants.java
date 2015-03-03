@@ -14,4 +14,6 @@ public class Constants {
 	public static final int PLAYER = 11;
 	public static final int GUN_ENEMY = 12;
 	public static final int MISSILE = 13;
+	
+	public static final int START_MISSILE_COUNT = 1000;
 }

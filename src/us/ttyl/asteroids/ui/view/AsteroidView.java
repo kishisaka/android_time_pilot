@@ -55,6 +55,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			if (GameState._lives >= 0)
 			{
 				MovementEngine player = new PlayerFighter(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1, this);
+				player.setMissileCount(Constants.START_MISSILE_COUNT);
 				GameState._weapons.set(0, player);
 				AudioPlayer.resumePlayerGun();
 			}
@@ -107,7 +108,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		
 		//add player to ship list
 		MovementEngine player = new PlayerFighter(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1, mGameStateListener); 
-		player.setMissileCount(10);
+		player.setMissileCount(Constants.START_MISSILE_COUNT);
 		GameState._weapons.add(player);			
 		
 		// start the game engine! 
@@ -410,7 +411,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 					GameState._playerEnemyShot = 0;
 					GameState._playerScore = 0;
 					MovementEngine player = new PlayerFighter(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1, mGameStateListener);
-					player.setMissileCount(10);
+					player.setMissileCount(Constants.START_MISSILE_COUNT);
 					
 					//resume player gun sound
 					AudioPlayer.resumePlayerGun();

@@ -68,7 +68,7 @@ public class MainLoop extends Thread
 				
 				// fire enemy guns constantly	
 				long currentTimeEnemyGun = System.currentTimeMillis();
-				if (currentTimeEnemyGun - startTimeEnemyGun > 850 && GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) == true)
+				if (currentTimeEnemyGun - startTimeEnemyGun > 850 && GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) == true && GameState.sFireEnemyGuns == true)
 				{
 					for(int i = 0; i < GameState._weapons.size(); i ++)
 					{
@@ -258,8 +258,8 @@ public class MainLoop extends Thread
 						int diffY = Math.abs((int)(currentShip.getY() - ship.getY())); 
 						if (diffX <= (10 * GameState._density) && diffY <= (10 * GameState._density))
 						{							
-							currentShip.onCollision(currentShip, ship);
-							ship.onCollision(ship, currentShip);
+							currentShip.onCollision(ship);
+							ship.onCollision(currentShip);
 						}						
 					}
 				}				

@@ -24,20 +24,22 @@ public class Parachute extends LineEngine
 	}
 
 	@Override
-	public void onCollision(MovementEngine engine1, MovementEngine engine2)
+	public void onCollision(MovementEngine engine2)
 	{
+		// player collects parachute, add 10 missiles to inventory, if player 
+		// collects 4 parachutes, kill all enemies and move to next level 
 		if (engine2.getWeaponName() == Constants.PLAYER)
 		{
 			engine2.setMissileCount(engine2.getMissileCount() + 10);
-			engine1.decrementHitPoints(1);
-			engine1.checkDestroyed();
-			AudioPlayer.playParachutePickup();
+			decrementHitPoints(1);
+			checkDestroyed();			
 			
 			GameState.sParachutePickupCount = GameState.sParachutePickupCount + 1;
 			
 			// if we got 4 parachutes, remove all ships, change level! 
 			if (GameState.sParachutePickupCount > 3)
 			{
+				AudioPlayer.playLevelChange();
 				Thread levelWait = new Thread(new Runnable()
 				{
 					@Override
@@ -45,6 +47,7 @@ public class Parachute extends LineEngine
 					{						
 						try
 						{
+							//notify the main loop not to build more enemies for 3500 ms
 							GameState.mWaitTimeBetweenLevels = true;
 							Thread.sleep(3500);
 							GameState.mWaitTimeBetweenLevels = false;
@@ -72,9 +75,7 @@ public class Parachute extends LineEngine
 					{
 						ship.decrementHitPoints(ship.getHitpoints());
 						ship.checkDestroyed();
-										
-						AudioPlayer.playShipDeath();
-						
+															
 						// create particle explosion for shot down aircraft
 						for(int particleCount = 0; particleCount < 15; particleCount ++)
 						{
@@ -87,10 +88,12 @@ public class Parachute extends LineEngine
 							GameState._weapons.add(explosionParticle);
 						}	
 					}																	
-				}
-				
-				
+				}				
 			}			
+			else
+			{
+				AudioPlayer.playParachutePickup();
+			}
 		}
 	}
 }

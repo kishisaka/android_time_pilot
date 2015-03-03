@@ -105,13 +105,10 @@ public class FreeEngine extends MovementEngine
 	}
 
 	@Override
-	public void onCollision(MovementEngine engine1, MovementEngine engine2) {
-		// TODO Auto-generated method stub
-		Log.i("kurt_test", "FreeEngine.onCollision()");		
+	public void onCollision(MovementEngine engine2) 
+	{
 	}
 
-	
-  
 	/*
 	public void updateDirection()
 	{
