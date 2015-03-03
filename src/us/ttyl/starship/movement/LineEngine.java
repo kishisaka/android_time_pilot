@@ -68,7 +68,6 @@ public class LineEngine extends MovementEngine
 	{
 		if (_endurance > 0)
 		{
-			//System.out.println("endurance_check for " + _name + ":" + _endurance);
 			_endurance = _endurance - 1;
 		}
 	}
@@ -80,22 +79,19 @@ public class LineEngine extends MovementEngine
 
 
 	@Override
-	public void updateSpeedIncrease() {
-		// TODO Auto-generated method stub
-		
+	public void updateSpeedIncrease() 
+	{
 	}
 
 	@Override
 	public void updateSpeedDecrease()
 	{
-		// TODO Auto-generated method stub
-		
 	}
+	
 
 	@Override
-	public void onCollision(MovementEngine engine1, MovementEngine engine2) {
-		// TODO Auto-generated method stub
-		
+	public void onCollision(MovementEngine engine2)
+	{
 	}
 
 }

@@ -13,6 +13,8 @@ public class GameState
 	public static boolean mIsThrottlePressed = false;
 	public static boolean mWaitTimeBetweenLevels = false;
 	
+	public static boolean sFireEnemyGuns = true;
+	
 	// guns, missiles, player ship, enemy ships
 	public static Vector <MovementEngine>_weapons = new Vector<MovementEngine>();
 	

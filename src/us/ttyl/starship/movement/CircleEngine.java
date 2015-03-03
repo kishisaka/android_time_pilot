@@ -97,9 +97,8 @@ public class CircleEngine extends MovementEngine
 	}
 	
 	@Override
-	public void onCollision(MovementEngine engine1, MovementEngine engine2)
+	public void onCollision(MovementEngine engine2)
 	{
-		Log.i("kurt_test", "CircleEngine.onCollision()");
 	}
 
 }

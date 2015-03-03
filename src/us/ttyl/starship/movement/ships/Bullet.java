@@ -17,14 +17,28 @@ public class Bullet extends LineEngine
 	}
 
 	@Override
-	public void onCollision(MovementEngine engine1, MovementEngine engine2)
+	public void onCollision(MovementEngine engine2)
 	{
 		if (getOrigin().getWeaponName() != engine2.getWeaponName())
 		{
-			if (engine2.getWeaponName() == Constants.ENEMY_BOSS || engine2.getWeaponName() == Constants.ENEMY_FIGHTER)
-			{
-				engine1.decrementHitPoints(1);
-				engine1.checkDestroyed();
+			if (engine2.getWeaponName() == Constants.ENEMY_BOSS || engine2.getWeaponName() == Constants.ENEMY_FIGHTER 
+					|| engine2.getWeaponName() == Constants.MISSILE_PLAYER || engine2.getWeaponName() == Constants.MISSILE_ENEMY)
+			{				
+				if (engine2.getWeaponName() == Constants.ENEMY_BOSS || engine2.getWeaponName() == Constants.ENEMY_FIGHTER)
+				{
+					decrementHitPoints(1);
+					checkDestroyed();
+				}
+				else if (engine2.getWeaponName() == Constants.MISSILE_ENEMY && getWeaponName() == Constants.GUN_PLAYER)
+				{
+					decrementHitPoints(1);
+					checkDestroyed();
+				}
+				else if (engine2.getWeaponName() == Constants.MISSILE_PLAYER && getWeaponName() == Constants.GUN_ENEMY)
+				{
+					decrementHitPoints(1);
+					checkDestroyed();
+				}
 			}
 		}
 	}

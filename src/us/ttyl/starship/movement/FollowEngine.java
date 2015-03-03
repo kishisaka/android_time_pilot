@@ -156,7 +156,7 @@ public class FollowEngine extends MovementEngine
 	}
 
 	@Override
-	public void onCollision(MovementEngine engine1, MovementEngine engine2) {
+	public void onCollision(MovementEngine engine2) {
 		// TODO Auto-generated method stub
 		
 	}

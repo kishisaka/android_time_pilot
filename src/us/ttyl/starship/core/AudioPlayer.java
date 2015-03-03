@@ -11,6 +11,7 @@ public class AudioPlayer
 	public static int sMissileSoundId;
 	public static int sShipDeathSoundId;
 	public static int sParachutePickup;
+	public static int sLevelChange;
 	
 	public static SoundPool sSoundPool;
 	
@@ -25,6 +26,7 @@ public class AudioPlayer
 		sShipDeathSoundId = sSoundPool.load(context, R.raw.enemy_death, 1);
 		sMissileSoundId = sSoundPool.load(context, R.raw.missile_launch2, 1);
 		sParachutePickup = sSoundPool.load(context, R.raw.parachute_pickup, 1);
+		sLevelChange = sSoundPool.load(context, R.raw.level_change, 1);
 		playPlayerGun();
 	}
 	
@@ -82,6 +84,11 @@ public class AudioPlayer
 	public static void playParachutePickup()
 	{
 		sSoundPool.play(sParachutePickup, .5f, .5f, 0, 0, 1.0f);
+	}
+	
+	public static void playLevelChange()
+	{
+		sSoundPool.play(sLevelChange, 1.0f, 1.0f, 0, 0, 1.0f);
 	}
 
 }
