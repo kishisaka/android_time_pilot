@@ -30,7 +30,7 @@ public class Parachute extends LineEngine
 		// collects 4 parachutes, kill all enemies and move to next level 
 		if (engine2.getWeaponName() == Constants.PLAYER)
 		{
-			engine2.setMissileCount(engine2.getMissileCount() + 10);
+			engine2.setMissileCount(engine2.getMissileCount() + 20);
 			decrementHitPoints(1);
 			checkDestroyed();
 			GameState._playerScore = GameState._playerScore + 1000;

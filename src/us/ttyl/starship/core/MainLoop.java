@@ -2,6 +2,7 @@ package us.ttyl.starship.core;
 
 import us.ttyl.starship.env.EnvBuilder;
 import us.ttyl.starship.movement.MovementEngine;
+import us.ttyl.starship.movement.ships.BossBullet;
 import us.ttyl.starship.movement.ships.Bullet;
 import us.ttyl.starship.movement.ships.ExplosionParticle;
 import us.ttyl.starship.movement.ships.Missile;
@@ -39,6 +40,7 @@ public class MainLoop extends Thread
 		long startTimeEnemyGun = startTime;
 		long startTimeClouds = startTime;
 		long startTimeBoss = startTime;
+		long startTimeBossBullet = startTime;
 		
 		//start player gun sound, this will run till player dies
 		if (GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) && GameState._weapons.get(0).getDestroyedFlag() == false)
@@ -51,7 +53,16 @@ public class MainLoop extends Thread
 		{	
 			long currentTime = System.currentTimeMillis();
 			try
-			{				
+			{	
+				//create clouds 
+				int cloudCount = GameUtils.getTypeCount(Constants.CLOUD); 
+				long currentTimeClouds = currentTime;
+				if (currentTimeClouds - startTimeClouds > 1000 && cloudCount < 6)
+				{
+					startTimeClouds = currentTimeClouds;
+					EnvBuilder.generateCloud(GameState._weapons.get(0).getX(), GameState._weapons.get(0).getY(), GameState._weapons.get(0).getCurrentDirection());
+				}				
+								
 		    	//generate a new ship. 	
 		    	int enemyCount = GameUtils.getTypeCount(Constants.ENEMY_FIGHTER); 
 		    	// System.out.println("enemyCount: " + enemyCount);
@@ -75,29 +86,46 @@ public class MainLoop extends Thread
 				if (currentTimeEnemyGun - startTimeEnemyGun > 850 && GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) == true && GameState.sFireEnemyGuns == true)
 				{
 					for(int i = 0; i < GameState._weapons.size(); i ++)
-					{
+					{	
+						if (currentTime - startTimeBossBullet > 500)
+						{
+							if (GameState._weapons.get(i).getWeaponName() == (Constants.ENEMY_BOSS))
+							{
+								int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));	
+								MovementEngine bossBullet = new BossBullet(targetTrack, targetTrack
+										, (int)GameState._weapons.get(i).getX() 
+										, (int)GameState._weapons.get(i).getY()
+										, 3, 3, 1, 1
+										, Constants.GUN_ENEMY, GameState._weapons.get(i), 50, 1);  
+								GameState._weapons.add(bossBullet);
+								startTimeBossBullet = currentTime;
+							}														
+						}
 						if ((int)(Math.random() * 100) > 98)
 						{
 							if (Math.random() * 100 > 20)
-							{
-								if (GameState._weapons.get(i).getWeaponName()==(Constants.ENEMY_FIGHTER))
+							{								
+								if (GameState._weapons.get(i).getWeaponName()==(Constants.ENEMY_FIGHTER) && GameUtils.getRange(GameState._weapons.get(i), GameState._weapons.get(0)) > 100)
 								{
 									startTimeEnemyGun = currentTimeEnemyGun;
 									
 									// get player track
-									int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));
-																							
+									int targetTrack = (int)GameUtils.getTargetTrack(GameState._weapons.get(i), GameState._weapons.get(0));																							
 									MovementEngine bullet = new Bullet(targetTrack, targetTrack
 											, (int)GameState._weapons.get(i).getX() 
 											, (int)GameState._weapons.get(i).getY()
 											, 3, 3, 1, 1
 											, Constants.GUN_ENEMY, GameState._weapons.get(i), 100, 1);  
 									GameState._weapons.add(bullet);
+									if (GameState._muted == false)
+									{
+										AudioPlayer.playEnemyGun();
+									}
 								}
 							}
 							else
 							{					
-								if (GameState._weapons.get(i).getWeaponName()==(Constants.ENEMY_FIGHTER))
+								if (GameState._weapons.get(i).getWeaponName()==(Constants.ENEMY_FIGHTER) && GameUtils.getRange(GameState._weapons.get(i), GameState._weapons.get(0)) > 100)
 								{
 									startTimeEnemyGun = currentTimeEnemyGun;
 									
@@ -118,7 +146,7 @@ public class MainLoop extends Thread
 							}
 						}
 					}
-				}
+				}								
 				
 				// fire gun constantly
 				// System.out.println("gunModifier:" + _gunModifier);
@@ -130,21 +158,12 @@ public class MainLoop extends Thread
 						startTimeGun = currentTimeGun;
 						MovementEngine bullet = new Bullet(GameState._weapons.get(0).getCurrentDirection() + _gunModifier, GameState._weapons.get(0).getCurrentDirection() + _gunModifier
 								, (int)GameState._weapons.get(0).getX()
-								, (int)GameState._weapons.get(0).getY(),8, 8, 1, 1, Constants.GUN_PLAYER, GameState._weapons.get(0), 200, 1);  
+								, (int)GameState._weapons.get(0).getY(),10, 10, 1, 1, Constants.GUN_PLAYER, GameState._weapons.get(0), 200, 1);  
 						GameState._weapons.add(bullet);
 						gunModifier();
 					}					
 				}
-				
-				//create clouds 
-				int cloundCount = GameUtils.getTypeCount(Constants.CLOUD); 
-				long currentTimeClouds = currentTime;
-				if (currentTimeClouds - startTimeClouds > 1000 && cloundCount < 6)
-				{
-					startTimeClouds = currentTimeClouds;
-					EnvBuilder.generateCloud(GameState._weapons.get(0).getX(), GameState._weapons.get(0).getY(), GameState._weapons.get(0).getCurrentDirection());
-				}
-				
+								
 				// move the ships around, check for collisions.
 				for(int i = 0; i < GameState._weapons.size(); i ++)
 		    	{		    		
@@ -181,11 +200,18 @@ public class MainLoop extends Thread
 				//check destroyed and remove from list if so, remove all objects that are over 450 units away from the player
 				for(int i = 1; i < GameState._weapons.size(); i ++)
 		    	{
-					if ((i > 0 && GameUtils.getRange(GameState._weapons.get(0), GameState._weapons.get(i)) > 450) 
-							|| (GameState._weapons.get(i).getDestroyedFlag() == true))
+					try
 					{
-						GameState._weapons.remove(i);
-					}		    		
+						if ((i > 0 && GameUtils.getRange(GameState._weapons.get(0), GameState._weapons.get(i)) > 450) 
+								|| (GameState._weapons.get(i).getDestroyedFlag() == true))
+						{
+							GameState._weapons.remove(i);
+						}	
+					}
+					catch(ArrayIndexOutOfBoundsException e)
+					{
+						// ignore and continue
+					}
 		    	}												
 				
 				long singleLoopTime = System.currentTimeMillis() - currentTime;
@@ -243,7 +269,7 @@ public class MainLoop extends Thread
 	
 	/**
 	 * weapon collision check, if a weapon is within 10 x 10 unit box  of any other units
-	 * let the weapons 2 that have collided figure out what to do (call each weapons's 
+	 * let the 2 weapons that have collided figure out what to do (call each weapons's 
 	 * onCollision() method) , ignore clouds, smoke trails, etc. 
 	 * @param currentShip
 	 */
@@ -263,24 +289,31 @@ public class MainLoop extends Thread
 			{					
 				if (i < GameState._weapons.size())
 				{
-					MovementEngine ship = GameState._weapons.get(i);					
-					if (ship.getWeaponName() == Constants.PLAYER 
-							|| ship.getWeaponName() == Constants.ENEMY_FIGHTER
-							|| ship.getWeaponName() == Constants.ENEMY_BOSS
-							|| ship.getWeaponName() == Constants.MISSILE_PLAYER	
-							|| ship.getWeaponName() == Constants.MISSILE_ENEMY
-							|| ship.getWeaponName() == Constants.GUN_ENEMY	
-							|| ship.getWeaponName() == Constants.GUN_PLAYER
-							|| ship.getWeaponName() == Constants.PARACHUTE
-							&& ship.getDestroyedFlag() == false)
+					try
 					{
-						int diffX = Math.abs((int)(currentShip.getX() - ship.getX())); 
-						int diffY = Math.abs((int)(currentShip.getY() - ship.getY())); 
-						if (diffX <= (10 * GameState._density) && diffY <= (10 * GameState._density))
-						{							
-							currentShip.onCollision(ship);
-							ship.onCollision(currentShip);
-						}						
+						MovementEngine ship = GameState._weapons.get(i);					
+						if (ship.getWeaponName() == Constants.PLAYER 
+								|| ship.getWeaponName() == Constants.ENEMY_FIGHTER
+								|| ship.getWeaponName() == Constants.ENEMY_BOSS
+								|| ship.getWeaponName() == Constants.MISSILE_PLAYER	
+								|| ship.getWeaponName() == Constants.MISSILE_ENEMY
+								|| ship.getWeaponName() == Constants.GUN_ENEMY	
+								|| ship.getWeaponName() == Constants.GUN_PLAYER
+								|| ship.getWeaponName() == Constants.PARACHUTE
+								&& ship.getDestroyedFlag() == false)
+						{
+							int diffX = Math.abs((int)(currentShip.getX() - ship.getX())); 
+							int diffY = Math.abs((int)(currentShip.getY() - ship.getY())); 
+							if (diffX <= (10 * GameState._density) && diffY <= (10 * GameState._density))
+							{							
+								currentShip.onCollision(ship);
+								ship.onCollision(currentShip);
+							}						
+						}
+					}
+					catch(ArrayIndexOutOfBoundsException e)
+					{
+						// ignore and continue
 					}
 				}				
 			}

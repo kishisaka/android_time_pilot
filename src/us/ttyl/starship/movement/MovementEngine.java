@@ -19,7 +19,7 @@ public abstract class MovementEngine
   double _acceleration;
   double _desiredSpeed;
   int _name;
-  int _endurance;
+  protected int _endurance;
   MovementEngine _origin;
   int _hitPoints = 1;
   int _missileCount = -1;

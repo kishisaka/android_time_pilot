@@ -109,7 +109,7 @@ public class EnvBuilder
 	  	*/
 		// the cloud
 		int track = ((int)(Math.random() * 359));
-		double[] coord = GameUtils.getCoordsGivenTrackAndDistance(track, 300);
+		double[] coord = GameUtils.getCoordsGivenTrackAndDistance(track, 400);
 		int direction = 0;
 		if (((int)Math.random()*100) > 50)
 		{
