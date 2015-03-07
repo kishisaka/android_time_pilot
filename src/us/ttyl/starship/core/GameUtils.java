@@ -228,6 +228,35 @@ public class GameUtils
 	}
 	
 	/**
+	 * get cloud sprites (small 36 x 36, large 144 x 72)
+	 * @param context
+	 * @return
+	 */
+	public static ArrayList <Bitmap> getCloudTiles(Context context)
+	{
+		ArrayList <Bitmap> tileList = new ArrayList<Bitmap>();
+		try
+		{
+			Bitmap tileMap = BitmapFactory.decodeResource(context.getResources(), R.drawable.sprites);		
+			int density = (int)context.getResources().getDisplayMetrics().density;
+			tileList.add(Bitmap.createBitmap(tileMap, 0, 7 * density * 36, density * 36, density * 36));										
+			tileList.add(Bitmap.createBitmap(tileMap, 0, 9 * density * 36, density * 144, density * 72));										
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return tileList;
+	}
+	
+	public static Bitmap getBossBullet(Context context)
+	{
+		Bitmap tileMap = BitmapFactory.decodeResource(context.getResources(), R.drawable.sprites);
+		int density = (int)context.getResources().getDisplayMetrics().density;
+		return Bitmap.createBitmap(tileMap, 0, 13 * density * 36, density * 36, density * 36);
+	}
+	
+	/**
 	 * given a track and a ship type, return the appropriate sprite for rendering
 	 * @param track
 	 * @param type
@@ -235,12 +264,27 @@ public class GameUtils
 	 */
 	public static Bitmap getImageType(int track, int type)
 	{
-		int missleRow = 12 * 12;
-		
+		int missleRow = 12 * 12;		
 		if (type == Constants.CLOUD)
 		{
-			return GameState._sprites.get(7*12);
+			return GameState._cloudSprites.get(0);
+//			if (Math.random() * 100 > 50)
+//			{
+//				return GameState._cloudSprites.get(0);
+//			}
+//			else
+//			{
+//				return GameState._cloudSprites.get(1);
+//			}
 		}		
+		else if (type == Constants.PARACHUTE_SMALL)
+		{
+			return GameState._sprites.get((7*12) + 2);
+		}
+		else if (type == Constants.MISSILE_SMALL)
+		{
+			return GameState._sprites.get((12*13) + 1);
+		}
 		else if (type == Constants.PARACHUTE)
 		{
 			return GameState._sprites.get((7*12) + 1);

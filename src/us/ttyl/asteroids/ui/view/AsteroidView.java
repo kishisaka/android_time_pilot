@@ -11,6 +11,7 @@ import us.ttyl.starship.core.GameUtils;
 import us.ttyl.starship.core.MainLoop;
 import us.ttyl.starship.listener.GameStateListener;
 import us.ttyl.starship.movement.MovementEngine;
+import us.ttyl.starship.movement.ships.Bullet;
 import us.ttyl.starship.movement.ships.Missile;
 import us.ttyl.starship.movement.ships.PlayerFighter;
 import android.content.Context;
@@ -69,6 +70,8 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			else
 			{
 				GameState._weapons.remove(0);
+				GameState.sCurrentLevel = 0;
+				GameState.sParachutePickupCount = 0;
 			}
 			
 			//remove all enemy guns and missiles
@@ -109,6 +112,8 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		//initialize sprite array
 		GameState._sprites = GameUtils.getTilesFromFile(context);
 		GameState._bossSprites = GameUtils.getBossTilesFromFile(context);
+		GameState._cloudSprites = GameUtils.getCloudTiles(context);
+		GameState._bossBullet = GameUtils.getBossBullet(context);
 		
 		//initalize sound
 		AudioPlayer.initSound(context);
@@ -155,6 +160,7 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 		Paint mTextColor = new Paint();
 		Paint mControllerColor = new Paint();
 		Paint mParticleExplosionBoss = new Paint();
+		Paint mBorderColor = new Paint();
 		
 		private static final String TAG = "AsteroidViewThread";
 		
@@ -171,10 +177,11 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			mMissileSmoke1.setColor(0xffffaa00);
 			mMissileSmoke2.setColor(0xffffff80);
 			mMissileSmoke3.setColor(0xffff0000);
-			mTextColor.setColor(0x7f000000);
+			mTextColor.setColor(Color.WHITE);
 			mTextColor.setTextSize(40);
-			mTextColor.setShadowLayer(2f, 2f, 2f, Color.BLACK);
+			mTextColor.setShadowLayer(2f, 2f, 2f, Color.GRAY);
 			mControllerColor.setColor(0x7f00988a);
+			mBorderColor.setColor(Color.BLACK);
 			
 		}
 		
@@ -189,15 +196,21 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 				//draw to the onscreen buffer using onDraw(), lock the canvas first
 				try
 				{
-					canvas = mSurfaceHolder.lockCanvas(null);	
-					synchronized (canvas) 
-					{																											
-						doDraw(canvas);							
+					if (mSurfaceHolder != null)
+					{
+						canvas = mSurfaceHolder.lockCanvas(null);	
+						if (canvas != null)
+						{
+							synchronized (canvas) 
+							{																											
+								doDraw(canvas);							
+							}
+						}						
 					}
 				}
 				catch (Exception e)
 				{
-					Log.e(TAG, "", e);
+					Log.e(TAG, "canvas or surface null, forget this one and conti", e);
 				}
 				finally
 				{
@@ -221,123 +234,185 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			
 			//draw the objects
 			//set center target
-		    MovementEngine me = GameState._weapons.elementAt(_selected);
-		    double centerX = (int)me.getX();
-		    double centerY = (int)me.getY();
-		
-		    //draw center target (selected)
-		    int density = (int)getContext().getResources().getDisplayMetrics().density;
-		    int pixelSize = 3 * density;
-		    int misslePixel = 2 * density;
-		    
-		    int centerXCanvas = (int)(mAppContext.getResources().getDisplayMetrics().widthPixels / 2);
-		    int centerYCanvas = (int)(mAppContext.getResources().getDisplayMetrics().heightPixels / 2);
-		    
-		    int canvasY = (int)(mAppContext.getResources().getDisplayMetrics().heightPixels);
-
-		    int spriteXSize = GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER).getWidth();
-		    int spriteYSize = GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER).getHeight();
-		    if (GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) && GameState._weapons.get(0).getDestroyedFlag() == false)
-		    {
-		    	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER), centerXCanvas - (spriteXSize/2), centerYCanvas - (spriteYSize/2), null);
-		    }
-		    
-		    //draw all other targets relative to center target, don't draw center target
-		    for (int i = 0; i < GameState._weapons.size(); i ++)
-		    {
-		    	if (i != _selected)
-		    	{	
-			        me = (MovementEngine)GameState._weapons.elementAt(i);
-			        double x = GameUtils.getA(centerX, me.getX())/_scale;
-			        double y = GameUtils.getB(centerY, me.getY())/_scale;
-			        double track = GameUtils.track(centerX, centerY, me.getX(), me.getY());
-			        double range = GameUtils.getRange(x, y);
-			        x = range * Math.cos(Math.toRadians(track));
-			        y = range * Math.sin(Math.toRadians(track));
-			        if (me.getWeaponName()==(Constants.ENEMY_FIGHTER))
-			        {
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY_FIGHTER),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
-			        }
-			        if (me.getWeaponName()==(Constants.PARACHUTE))
-			        {
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.PARACHUTE),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
-			        }
-			        if (me.getWeaponName()==(Constants.ENEMY_BOSS))
-			        {
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY_BOSS),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
-			        }
-			        else if(me.getWeaponName()==(Constants.GUN_ENEMY))
-			        {			        	
-			        	canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mGunEnemy);
-			        }
-			        else if(me.getWeaponName()==(Constants.GUN_PLAYER))
-			        {
-			        	canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mGunPlayer);
-			        }
-			        else if(me.getWeaponName()==(Constants.MISSILE_PLAYER) || me.getWeaponName()==(Constants.MISSILE_ENEMY))
-			        {
-			        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.MISSILE),(int)(centerXCanvas + x - (18 * density)), (int)(centerYCanvas - y - (18 * density)), null);
-			        }
-			        else if(me.getWeaponName()==(Constants.CLOUD))
-			    	{		        
-			    		canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.CLOUD),(int)(centerXCanvas + x), (int)(centerYCanvas - y), null);
-			    	}
-			    	else if(me.getWeaponName()==(Constants.EXPLOSION_PARTICLE))
-			    	{		        
-			    		canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosion);
-			    	}
-			    	else if(me.getWeaponName()==(Constants.MISSILE_SMOKE))
-			        {	
-			        	Paint smokeColor = null;
-			        	if (me.getEndurance() > 10)
-			        	{
-			        		smokeColor = mMissileSmoke1;
-			        	}
-			        	if (me.getEndurance() >= 7 && me.getEndurance() <= 10)
-			        	{
-			        		smokeColor = mMissileSmoke2;
-			        	}
-			        	if (me.getEndurance() < 7 )
-			        	{
-			        		smokeColor = mMissileSmoke3;
-			        	}
-			        	
-			        	int[] smokeOffset = GameUtils.getSmokeTrailXY(me.getCurrentDirection());
-			        	int x1 = (int)(centerXCanvas + x) + (density * smokeOffset[0]);
-			        	int y1 = (int)(centerYCanvas - y) + (density * smokeOffset[1]);
-			        	int x2 = x1 + misslePixel;
-			        	int y2 = y1 + misslePixel;
-			        	canvas.drawRect(x1, y1, x2, y2, smokeColor);
-			        }
-			    	else if(me.getWeaponName()==(Constants.BOSS_SMOKE))
-			        {	
-			    		canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosionBoss);
-			        }
-		    	}	
-		    }	    
-		    canvas.drawText("score: " + GameState._playerScore, (int)(20 * density) , (int)(50 * density), mTextColor);
-		    if (GameState._lives < 0)
-		    {
-		    	GameState._lives = 0;
-		    }
-		    canvas.drawText("planes left: " + GameState._lives, (int)(200 * density) , (int)(50 * density), mTextColor);
-		    
-		    //draw the controller circle
-		    int directionControllerSize = 100 * density;
-		    mControllerCircleX = getContext().getResources().getDisplayMetrics().widthPixels / 2;
-		    mControllerCircleY = canvasY - directionControllerSize - (20 * density);
-		    canvas.drawCircle(mControllerCircleX, mControllerCircleY, directionControllerSize, mControllerColor);
-		    
-		    //draw the special weapon circle
-		    int specialWeaponSize = 30 * density;
-		    mSpecialWeaponX = getContext().getResources().getDisplayMetrics().widthPixels - specialWeaponSize;
-		    mSpecialWeaponY =  canvasY - directionControllerSize;
-		    canvas.drawCircle(mSpecialWeaponX, mSpecialWeaponY, specialWeaponSize, mControllerColor);
-		    
-		    if (GameState._weapons.get(0).getWeaponName()!=(Constants.PLAYER))
-		    {
-		    	canvas.drawText("Game Over",  centerXCanvas - (40 * density), centerYCanvas - (40 * density), mTextColor);
-		    }
+			try
+			{
+			    MovementEngine me = GameState._weapons.elementAt(_selected);
+			    double centerX = (int)me.getX();
+			    double centerY = (int)me.getY();
+			
+			    //draw center target (selected)
+			    int density = (int)getContext().getResources().getDisplayMetrics().density;
+			    int pixelSize = 3 * density;
+			    int misslePixel = 2 * density;
+			    
+			    int centerXCanvas = (int)(mAppContext.getResources().getDisplayMetrics().widthPixels / 2);
+			    int centerYCanvas = (int)(mAppContext.getResources().getDisplayMetrics().heightPixels / 2);
+	
+			    int spriteXSize = GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER).getWidth();
+			    int spriteYSize = GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER).getHeight();
+			    if (GameState._weapons.get(0).getWeaponName()==(Constants.PLAYER) && GameState._weapons.get(0).getDestroyedFlag() == false)
+			    {
+			    	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.PLAYER), centerXCanvas - (spriteXSize/2), centerYCanvas - (spriteYSize/2), null);
+			    }
+			    
+			    //draw all other targets relative to center target, don't draw center target
+			    for (int i = 0; i < GameState._weapons.size(); i ++)
+			    {
+			    	if (i != _selected)
+			    	{	
+			    		try		    			
+			    		{
+					        me = (MovementEngine)GameState._weapons.elementAt(i);
+					        double x = GameUtils.getA(centerX, me.getX())/_scale;
+					        double y = GameUtils.getB(centerY, me.getY())/_scale;
+					        double track = GameUtils.track(centerX, centerY, me.getX(), me.getY());
+					        double range = GameUtils.getRange(x, y);
+					        x = range * Math.cos(Math.toRadians(track));
+					        y = range * Math.sin(Math.toRadians(track));					      
+					        if (me.getWeaponName()==(Constants.ENEMY_FIGHTER))
+					        {
+					        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY_FIGHTER),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
+					        }
+					        if (me.getWeaponName()==(Constants.PARACHUTE))
+					        {
+					        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.PARACHUTE),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
+					        }
+					        if (me.getWeaponName()==(Constants.ENEMY_BOSS))
+					        {
+					        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.ENEMY_BOSS),(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
+					        }
+					        else if(me.getWeaponName()==(Constants.GUN_ENEMY))
+					        {			        	
+					        	if (me.getOrigin().getWeaponName() == Constants.ENEMY_FIGHTER)
+					        	{
+					        		canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mGunEnemy);
+					        	}
+					        	else
+					        	{
+					        		if (me instanceof Bullet)
+					        		{
+					        			canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mGunEnemy);
+					        		}
+					        		else
+					        		{
+					        			canvas.drawBitmap(GameState._bossBullet,(int)(centerXCanvas - (spriteXSize/2) + x), (int)(centerYCanvas - (spriteYSize/2) - y), null);
+					        		}
+					        	}
+					        }
+					        else if(me.getWeaponName()==(Constants.GUN_PLAYER))
+					        {
+					        	canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mGunPlayer);
+					        }
+					        else if(me.getWeaponName()==(Constants.MISSILE_PLAYER) || me.getWeaponName()==(Constants.MISSILE_ENEMY))
+					        {
+					        	canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.MISSILE),(int)(centerXCanvas + x - (18 * density)), (int)(centerYCanvas - y - (18 * density)), null);
+					        }
+					        else if(me.getWeaponName()==(Constants.CLOUD))
+					    	{		        
+					    		canvas.drawBitmap(GameUtils.getImageType(me.getCurrentDirection(), Constants.CLOUD),(int)(centerXCanvas + x), (int)(centerYCanvas - y), null);
+					    	}
+					    	else if(me.getWeaponName()==(Constants.EXPLOSION_PARTICLE))
+					    	{		        
+					    		canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosion);
+					    	}
+					    	else if(me.getWeaponName()==(Constants.MISSILE_SMOKE))
+					        {	
+					        	Paint smokeColor = null;
+					        	if (me.getEndurance() > 10)
+					        	{
+					        		smokeColor = mMissileSmoke1;
+					        	}
+					        	if (me.getEndurance() >= 7 && me.getEndurance() <= 10)
+					        	{
+					        		smokeColor = mMissileSmoke2;
+					        	}
+					        	if (me.getEndurance() < 7 )
+					        	{
+					        		smokeColor = mMissileSmoke3;
+					        	}
+					        	
+					        	int[] smokeOffset = GameUtils.getSmokeTrailXY(me.getCurrentDirection());
+					        	int x1 = (int)(centerXCanvas + x) + (density * smokeOffset[0]);
+					        	int y1 = (int)(centerYCanvas - y) + (density * smokeOffset[1]);
+					        	int x2 = x1 + misslePixel;
+					        	int y2 = y1 + misslePixel;
+					        	canvas.drawRect(x1, y1, x2, y2, smokeColor);
+					        }
+					    	else if(me.getWeaponName()==(Constants.BOSS_SMOKE))
+					        {	
+					    		canvas.drawRect((int)(centerXCanvas + x), (int)(centerYCanvas - y), (int)(centerXCanvas + pixelSize + x), (int)(centerYCanvas + pixelSize - y), mParticleExplosionBoss);
+					        }	
+			    		}
+			    		catch(ArrayIndexOutOfBoundsException e)
+			    		{
+			    			// do nothing, simply continue to next weapon. this item might have already been destroyed by main loop
+			    		}
+				    }
+			    }
+			    // draw the top and bottom borders 
+			    int width = getResources().getDisplayMetrics().widthPixels;
+			    int height = getResources().getDisplayMetrics().heightPixels;
+			    height = (height - width) / 2;  
+			    canvas.drawRect(0, 0 ,width, height, mBorderColor);
+			    canvas.drawRect(0,getResources().getDisplayMetrics().heightPixels - height, width, getResources().getDisplayMetrics().heightPixels, mBorderColor);
+			     
+			    // draw the score
+			    canvas.drawText("1-UP: " + GameState._playerScore, (int)(15 * density) , (int)(50 * density), mTextColor);			   
+			    
+			    // draw the player life count
+			    int counter = (getResources().getDisplayMetrics().widthPixels/density) - (30);
+			    for(int i = 0; i < GameState._lives; i ++)
+			    {			    	
+			    	canvas.drawBitmap(GameUtils.getImageType(180, Constants.PLAYER), counter * density, 0 * density, null);
+			    	counter = counter - 30;
+			    }
+			    
+			    //draw the parachute captured count
+			    counter = (getResources().getDisplayMetrics().widthPixels/density) - (30);
+			    for(int i = 0; i < GameState.sParachutePickupCount; i ++)
+			    {			    	
+			    	canvas.drawBitmap(GameUtils.getImageType(0, Constants.PARACHUTE_SMALL), counter * density, 40 * density, null);
+			    	counter = counter - 30;
+			    }
+			   
+			    // draw player missle count
+			    int missileCountOnes = GameState._weapons.get(0).getMissileCount() % 10;
+			    int missileCountTens = GameState._weapons.get(0).getMissileCount() / 10;
+			    counter = 0;
+			    // draw 10s missle count
+			    for(int i = 0; i < missileCountTens; i ++)
+			    {
+			    	canvas.drawBitmap(GameUtils.getImageType(90, Constants.MISSILE), counter * density, 0 * density, null);
+			    	counter = counter + 8;
+			    }
+			    // draw ones missile count
+			    for(int i = 0; i < missileCountOnes; i ++)
+			    {
+			    	canvas.drawBitmap(GameUtils.getImageType(90, Constants.MISSILE_SMALL), counter * density, 3 * density, null);
+			    	counter = counter + 8;
+			    }
+			    	
+			    //draw the controller circle
+			    int directionControllerSize = height / 2;
+			    mControllerCircleX = getContext().getResources().getDisplayMetrics().widthPixels / 2;
+			    mControllerCircleY =  getContext().getResources().getDisplayMetrics().heightPixels - (height / 2);
+			    canvas.drawCircle(mControllerCircleX, mControllerCircleY, directionControllerSize, mControllerColor);
+			    
+			    //draw the special weapon circle
+			    int specialWeaponSize = height / 4;
+			    mSpecialWeaponX = (int)(getContext().getResources().getDisplayMetrics().widthPixels * .85);
+			    mSpecialWeaponY =  getContext().getResources().getDisplayMetrics().heightPixels - (height / 2);
+			    canvas.drawCircle(mSpecialWeaponX, mSpecialWeaponY, specialWeaponSize, mControllerColor);
+			    
+			    if (GameState._weapons.get(0).getWeaponName()!=(Constants.PLAYER))
+			    {
+			    	canvas.drawText("Game Over",  centerXCanvas - (40 * density), centerYCanvas - (40 * density), mTextColor);
+			    }				    
+			}
+			catch(Exception e)
+			{
+				// ignore, most likely the player ship was destroyed. 
+			}
 		}
 		
 		public void stopAsteroidViewThread()
@@ -424,91 +499,88 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
     {
 		int count = motionEvent.getPointerCount();
 		
-		// get the direction and special weapon motion events if exists. 
-		if (GameState._weapons.get(0).getDestroyedFlag() == false)
+		// get the direction and special weapon motion events if exists. 		
+		for(int countIndex = 0; countIndex < count; countIndex ++)
 		{
-			for(int countIndex = 0; countIndex < count; countIndex ++)
+			int x = 0;
+			int y = 0;
+			
+			int density = (int)getContext().getResources().getDisplayMetrics().density;
+			
+			x = (int)MotionEventCompat.getX(motionEvent, countIndex);
+			y = (int)MotionEventCompat.getY(motionEvent, countIndex);
+			
+			double rangeController = GameUtils.getRangeBetweenCoords(mControllerCircleX, mControllerCircleY, x, y);
+			double rangeSpecialWeapon = GameUtils.getRangeBetweenCoords(mSpecialWeaponX, mSpecialWeaponY, x, y);
+					
+			// process the events! 
+			if (rangeController <= (100 * density))
+			{		
+				x = x - mControllerCircleX;
+				y = y - mControllerCircleY;
+				int track = _degrev[(int)GameUtils.track(0,0,x,y)];
+				GameState._weapons.get(0).setDirection(track);	
+			}
+			if (rangeSpecialWeapon <= (30 * density))
 			{
-				int x = 0;
-				int y = 0;
-				
-				int density = (int)getContext().getResources().getDisplayMetrics().density;
-				
-				x = (int)MotionEventCompat.getX(motionEvent, countIndex);
-				y = (int)MotionEventCompat.getY(motionEvent, countIndex);
-				
-				double rangeController = GameUtils.getRangeBetweenCoords(mControllerCircleX, mControllerCircleY, x, y);
-				double rangeSpecialWeapon = GameUtils.getRangeBetweenCoords(mSpecialWeaponX, mSpecialWeaponY, x, y);
-						
-				// process the events! 
-				if (rangeController <= (100 * density))
-				{		
-					x = x - mControllerCircleX;
-					y = y - mControllerCircleY;
-					int track = _degrev[(int)GameUtils.track(0,0,x,y)];
-					GameState._weapons.get(0).setDirection(track);	
-				}
-				if (rangeSpecialWeapon <= (30 * density))
+				if ((GameState._weapons.get(0).getWeaponName()!=(Constants.PLAYER)))
 				{
-					if ((GameState._weapons.get(0).getWeaponName()!=(Constants.PLAYER)))
+					//restart game
+					GameState._lives = 2;
+					GameState._playerBulletsShot = 0;
+					GameState._playerEnemyShot = 0;
+					GameState._playerScore = 0;
+					MovementEngine player = new PlayerFighter(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1, mGameStateListener);
+					player.setMissileCount(Constants.START_MISSILE_COUNT);
+					
+					//resume player gun sound
+					AudioPlayer.resumePlayerGun();
+					
+					//remove all enemy guns and missiles
+					for(int i =0 ; i < GameState._weapons.size(); i ++)
 					{
-						//restart game
-						GameState._lives = 2;
-						GameState._playerBulletsShot = 0;
-						GameState._playerEnemyShot = 0;
-						GameState._playerScore = 0;
-						MovementEngine player = new PlayerFighter(0, 0, 0d, 0d, 2d, 2d, 5, .1d, 0, Constants.PLAYER, -1, mGameStateListener);
-						player.setMissileCount(Constants.START_MISSILE_COUNT);
-						
-						//resume player gun sound
-						AudioPlayer.resumePlayerGun();
-						
-						//remove all enemy guns and missiles
-						for(int i =0 ; i < GameState._weapons.size(); i ++)
+						MovementEngine enemyWeapon = GameState._weapons.get(i);
+						if (enemyWeapon.getWeaponName()==(Constants.GUN_ENEMY) || enemyWeapon.getWeaponName()==(Constants.MISSILE_ENEMY) || enemyWeapon.getWeaponName()==(Constants.ENEMY_BOSS))
 						{
-							MovementEngine enemyWeapon = GameState._weapons.get(i);
-							if (enemyWeapon.getWeaponName()==(Constants.GUN_ENEMY) || enemyWeapon.getWeaponName()==(Constants.MISSILE_ENEMY) || enemyWeapon.getWeaponName()==(Constants.ENEMY_BOSS))
-							{
-								GameState._weapons.remove(i);
+							GameState._weapons.remove(i);
+						}
+					}
+					GameState._weapons.set(0, player);	
+				}
+				else
+				{
+					//launch missiles
+					long currentTime = System.currentTimeMillis();
+					long timeDiff = currentTime - mMissileLastLaunch;
+					if (timeDiff > 250 && GameState._weapons.get(0).getMissileCount() > 0)
+					{
+						// subtract one from missile count
+						GameState._weapons.get(0).decrementMissileCount();
+						
+						mMissileLastLaunch = currentTime;
+						for (int z = 0; z < 2; z ++)
+						{
+							// find closest target			
+							MovementEngine closestTarget = findClosestTarget();
+							int targetTrack = (int)(GameUtils.getTargetTrack(GameState._weapons.get(0), closestTarget));
+							
+							// once the closest target is selected, launch the missile. 
+							if (closestTarget != null && targetTrack != -1)
+							{					
+								MovementEngine missile = new Missile(targetTrack
+										, targetTrack
+										, (int)GameState._weapons.get(0).getX(), (int)GameState._weapons.get(0).getY(), .01, 10, .1, 1
+										, Constants.MISSILE_PLAYER, closestTarget,  GameState._weapons.get(0), 250);  
+								GameState._weapons.add(missile);
 							}
 						}
-						GameState._weapons.set(0, player);	
-					}
-					else
-					{
-						//launch missiles
-						long currentTime = System.currentTimeMillis();
-						long timeDiff = currentTime - mMissileLastLaunch;
-						if (timeDiff > 250 && GameState._weapons.get(0).getMissileCount() > 0)
+						if (GameState._muted == false)
 						{
-							// subtract one from missile count
-							GameState._weapons.get(0).decrementMissileCount();
-							
-							mMissileLastLaunch = currentTime;
-							for (int z = 0; z < 2; z ++)
-							{
-								// find closest target			
-								MovementEngine closestTarget = findClosestTarget();
-								int targetTrack = (int)(GameUtils.getTargetTrack(GameState._weapons.get(0), closestTarget));
-								
-								// once the closest target is selected, launch the missile. 
-								if (closestTarget != null && targetTrack != -1)
-								{					
-									MovementEngine missile = new Missile(targetTrack
-											, targetTrack
-											, (int)GameState._weapons.get(0).getX(), (int)GameState._weapons.get(0).getY(), .01, 10, .1, 1
-											, Constants.MISSILE_PLAYER, closestTarget,  GameState._weapons.get(0), 250);  
-									GameState._weapons.add(missile);
-								}
-							}
-							if (GameState._muted == false)
-							{
-								AudioPlayer.playMissileSound();
-							}
-						}					
-					}
-				}	
-			}
+							AudioPlayer.playMissileSound();
+						}
+					}					
+				}
+			}	
 		}
     	return true;
     }

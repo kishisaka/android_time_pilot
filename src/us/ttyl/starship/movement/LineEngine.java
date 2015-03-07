@@ -69,7 +69,7 @@ public class LineEngine extends MovementEngine
 		if (_endurance > 0)
 		{
 			_endurance = _endurance - 1;
-		}
+		}		
 	}
 
 	@Override

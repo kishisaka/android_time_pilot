@@ -13,7 +13,7 @@ public class GameState
 	public static boolean mIsThrottlePressed = false;
 	public static boolean mWaitTimeBetweenLevels = false;
 	
-	public static boolean sFireEnemyGuns = true;
+	public static boolean sFireEnemyGuns =false;
 	
 	// guns, missiles, player ship, enemy ships
 	public static Vector <MovementEngine>_weapons = new Vector<MovementEngine>();
@@ -21,6 +21,9 @@ public class GameState
 	//sprites
 	public static ArrayList <Bitmap> _sprites;
 	public static ArrayList <Bitmap> _bossSprites;
+	public static ArrayList <Bitmap> _cloudSprites;
+	public static ArrayList <Bitmap> _borders;
+	public static Bitmap _bossBullet;
 	
 	//player score
 	public static int _enemiesShotDown = 0;
