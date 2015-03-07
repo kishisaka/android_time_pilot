@@ -70,6 +70,8 @@ public class AsteroidView extends SurfaceView implements SurfaceHolder.Callback
 			else
 			{
 				GameState._weapons.remove(0);
+				GameState.sCurrentLevel = 0;
+				GameState.sParachutePickupCount = 0;
 			}
 			
 			//remove all enemy guns and missiles
